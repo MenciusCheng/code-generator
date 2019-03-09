@@ -1,0 +1,9 @@
+
+.row {
+    margin-bottom: 20px;
+}
+
+.col {
+    display: inline-block;
+    vertical-align: top;
+}

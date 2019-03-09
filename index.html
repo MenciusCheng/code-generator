@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>代码生成器</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="lib/jquery-3.3.1.js"></script>
+</head>
+
+<body>
+    <h3>代码生成器</h3>
+    <div class="row">
+        <div class="col">
+            <div>sql</div>
+            <div>
+                <textarea name="sqlTextArea" id="sqlTextArea" cols="60" rows="30" wrap="off"></textarea>
+            </div>
+            <div>
+                <button id="parseSqlButton">解析</button>
+            </div>
+        </div>
+        <div class="col">
+            <div>模板</div>
+            <div>
+                <textarea name="templateTextArea" id="templateTextArea" cols="60" rows="30" wrap="off"></textarea>
+            </div>
+            <div>
+                <select id="templateSelect">
+                    <option value="thrift">thrift</option>
+                    <option value="case class">case class</option>
+                    <option value="自定义一号">自定义一号(保存在cookie中)</option>
+                    <option value="自定义二号">自定义二号</option>
+                </select>
+            </div>
+        </div>
+        <div class="col">
+            <div>结果</div>
+            <div>
+                <textarea name="resultTextArea" id="resultTextArea" cols="60" rows="30" wrap="off"></textarea>
+            </div>
+            <div>
+                <button>复制</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
