@@ -170,7 +170,7 @@ struct T=[upperFirst,tableName] {
     /**
     * =[fieldComment]
     **/
-    =[forIndex]: =[IF,isOptional]optional=[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
+    =[forIndex]:=[IF,isOptional] optional=[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
 =[FOREND]
 }
 `;
