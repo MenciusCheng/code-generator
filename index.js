@@ -73,11 +73,6 @@ function transform(textArr, obj, templateArr) {
                 transform(textArr, value, tempArr)
             })
         } else {
-
-            // if (/=\[IF,(\w+)\](.+)=\[IFEND\]/g.test(templateLine)) {
-            //     debugger
-            // }
-
             let el =
                 templateLine
                     .replace(/=\[IF,(\w+)\](.+?)=\[IFEND\]/g, (_, field, str) => obj[field] ? str : '')
@@ -101,7 +96,7 @@ function camelize(str) {
 // 驼峰转下划线
 function underScore(str) {
     const underScoreRE = /([a-z])([A-Z])/g
-    return str.replace(underScoreRE, (_, a, c) => c ? a + '_' + c.toLowerCase() : '')
+    return str ? str.replace(underScoreRE, (_, a, c) => c ? a + '_' + c.toLowerCase() : '') : str
 }
 
 // 首字母转大写
@@ -173,6 +168,37 @@ object =[upperFirst,tableName] extends SnakifiedSprayJsonSupport{
 }
 `;
 
+let = curdSqlTemplate = 
+`def insert=[upperFirst,tableName](request: TCreate=[upperFirst,tableName]Request) {
+    val insertSql = 
+      sql"""
+        INSERT INTO =[plural,tableName] SET
+  =[FOR,rows]
+          =[underScore,fieldName] = \${request.=[fieldName]}=[SEP,addSeparatorComma]
+  =[FOREND]
+      """
+    datasouce.esql(insertSql)
+  }
+  
+  def updateCategory(request: TUpdateCategoryRequest) {
+    val updateSql = 
+      sql" UPDATE =[plural,tableName] SET " +
+=[FOR,rows]
+      (request.=[fieldName].isDefined).optional(sql"=[underScore,fieldName] = \${request.=[fieldName].get()},") +
+=[FOREND]
+      sql" updated_at = NOW() WHERE id = \${request.id} "
+    datasouce.esql(insertSql)
+  }
+  
+  def get=[upperFirst,tableName]ById(id: Int): Option[=[upperFirst,tableName]] = {
+    datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[plural,tableName] WHERE id = \${id}")
+  }
+  
+  def getAll=[upperFirst,tableName](): List[=[upperFirst,tableName]] = {
+    datasouce.rows[=[upperFirst,tableName]](sql"SELECT * FROM =[plural,tableName] ")
+  }
+`;
+
 (function () {
     // 模板支持的普通方法
     window.supportMethod = {
@@ -204,6 +230,8 @@ object =[upperFirst,tableName] extends SnakifiedSprayJsonSupport{
             $('#templateTextArea').val(thriftTemplate)
         } else if (event.target.value == "case class") {
             $('#templateTextArea').val(caseClassTemplate)
+        } else if (event.target.value == "CURD") {
+            $('#templateTextArea').val(curdSqlTemplate)
         } else if (event.target.value == "自定义") {
             $('#templateTextArea').val("")
         }
