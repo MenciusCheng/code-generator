@@ -8,8 +8,6 @@
     <title>代码生成器</title>
 
     <link rel="stylesheet" href="style.css">
-
-    <script src="lib/jquery-3.3.1.js"></script>
 </head>
 
 <body>
@@ -33,8 +31,8 @@
                 <select id="templateSelect">
                     <option value="thrift">thrift</option>
                     <option value="case class">case class</option>
-                    <option value="自定义一号">自定义一号(保存在cookie中)</option>
-                    <option value="自定义二号">自定义二号</option>
+                    <!-- <option value="自定义一号">自定义一号(保存在cookie中)</option>
+                    <option value="自定义二号">自定义二号</option> -->
                 </select>
             </div>
         </div>
@@ -44,11 +42,36 @@
                 <textarea name="resultTextArea" id="resultTextArea" cols="60" rows="30" wrap="off"></textarea>
             </div>
             <div>
-                <button>复制</button>
+                <button id="copyResultButton" data-clipboard-target="#resultTextArea">复制</button>
             </div>
         </div>
     </div>
 
+    <div class="row">
+        <h4>说明</h4>
+        <p>模板格式：=[属性名], =[通用方法,属性名], =[SEP,特殊方法名], =[FOR,属性名], =[FOREND], =[IF,属性名], =[IFEND]</p>
+        <p>通用方法：camelize, underScore, upperFirst, lowerFirst, plural, singular</p>
+        <p>特殊方法：addSeparatorComma</p>
+        <p>SQL 解析出来的格式如下，解析后的对象会打印在控制台中。</p>
+        <p>
+            {<br>
+                tableName: "",<br>
+                tableComment: "",<br>
+                rows: [<br>
+                    {<br>
+                        fieldName: "",<br>
+                        dataType: "", // string, int, timestamp, double<br> 
+                        isOptional: 0,<br>
+                        fieldComment: ""<br>
+                    }<br>
+                ]<br>
+            }
+        </p>
+    </div>
+
+    <script src="lib/jquery-3.3.1.js"></script>
+    <script src="lib/clipboard.min.js"></script>
+    <script src="lib/pluralize.js"></script>
     <script src="index.js"></script>
 </body>
 
