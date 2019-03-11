@@ -77,7 +77,7 @@ function transform(textArr, obj, templateArr) {
         } else {
             let el =
                 templateLine
-                    .replace(/=\[IF,(\w+)\](.+?)=\[IFEND\]/g, (_, field, str) => obj[field] ? str : '')
+                    .replace(/=\[IF,(\w+)\](.+?)\[IFEND\]/g, (_, field, str) => obj[field] ? str : '')
                     .replace(/=\[SEP,(\w+)\]/g, (_, fn) => window.supportInterMethod[fn] ? window.supportInterMethod[fn](obj) : '')
                     .replace(/=\[(\w+)\]/g, (_, field) => obj[field])
                     .replace(/=\[(\w+),(\w+)\]/g, (_, fn, field) => window.supportMethod[fn] ? window.supportMethod[fn](obj[field]) : '')
@@ -170,7 +170,7 @@ struct T=[upperFirst,tableName] {
     /**
     * =[fieldComment]
     **/
-    =[forIndex]:=[IF,isOptional] optional=[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
+    =[forIndex]:=[IF,isOptional] optional[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
 =[FOREND]
 }
 `;
@@ -179,7 +179,7 @@ let caseClassTemplate =
 `case class =[upperFirst,tableName] ( 
 =[FOR,rows]
 /** =[fieldComment] */ 
-=[fieldName]: =[IF,isOptional]Option[=[IFEND]=[dataTypeToScala,dataType]=[IF,isOptional]]=[IFEND]=[SEP,addSeparatorComma]
+=[fieldName]: =[IF,isOptional]Option[[IFEND]=[dataTypeToScala,dataType]=[IF,isOptional]][IFEND]=[SEP,addSeparatorComma]
 =[FOREND]
 ) 	
     

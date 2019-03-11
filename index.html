@@ -51,27 +51,56 @@
         </div>
     </div>
 
+    <h3>说明</h3>
     <div class="row">
-        <h4>说明</h4>
-        <p>模板格式：=[属性名], =[通用方法,属性名], =[SEP,特殊方法名], =[FOR,属性名], =[FOREND], =[IF,属性名], =[IFEND], @=[自定义属性名,属性值]</p>
-        <p>通用方法：camelize, underScore, upperFirst, lowerFirst, plural, singular, dataTypeToScala, dataTypeToThrift, upperFirstAndPlural</p>
-        <p>特殊方法：addSeparatorComma</p>
-        <p>自定义参数：比如模板 service 里面，可以在SQL那里加一行 @=[serviceName,生产商]</p>
-        <p>SQL 解析出来的格式如下，解析后的对象会打印在控制台中。</p>
-        <p>
-            {<br>
-                tableName: "category",<br>
-                tableComment: "细分品类表",<br>
-                rows: [<br>
-                    {<br>
-                        fieldName: "nameEn",<br>
-                        dataType: "string", // string, int, timestamp, double<br> 
-                        isOptional: true,<br>
-                        fieldComment: "英文全称"<br>
-                    }<br>
-                ]<br>
-            }
-        </p>
+        <p>这个代码生成器会先把 SQL 解析成一个对象，再根据模板取出对象的属性，生成代码。</p>
+        <h4>模板格式</h4>
+        <ul>
+            <li>=[属性名] // 获取指定属性名的值</li>
+            <li>=[通用方法,属性名] // 可以在通用方法列表里面选择你要的方法，然后这个方法会作用在指定的属性名上。注意：里面不能有空格。想要更多的方法？等你来建议。</li>
+            <li>=[SEP,特殊方法名] // 可以在特殊方法列表里面选择你要的方法。</li>
+            <li>For 循环，循环指定的属性数组，并且可以在里面使用 forIndex 和 forLength 属性。注意：目前的属性数组只有 rows</li>
+            <pre>
+=[FOR,属性名]
+// 循环体
+=[FOREND]</pre>
+            <li>=[IF,属性名]内容[IFEND] // 条件语句，当属性为真时，显示里面的内容。</li>
+        </ul>
+        <h4>自定义属性</h4>
+        <p>你可以在SQL编辑器那里添加自己的属性，然后在模板里面使用，注意该方法必须单独一行，前后不能有其他字符，格式如下：</p>
+        <p>@=[自定义属性名,属性值]</p>
+        <p>示例：比如模板 service 里面，可以在SQL编辑器那里加一行 @=[serviceName,生产商]</p>
+        <h4>通用方法</h4>
+        <ul>
+            <li>camelize // 下划线转驼峰</li>
+            <li>underScore // 驼峰转下划线</li>
+            <li>upperFirst // 首字母转大写</li>
+            <li>lowerFirst // 首字母转小写</li>
+            <li>singular // 单词转单数</li>
+            <li>plural // 单词转复数</li>
+            <li>dataTypeToScala // 把数据类型转换为Scala的类型</li>
+            <li>dataTypeToThrift // 把数据类型转换为Thrift的类型</li>
+            <li>upperFirstAndPlural // 首字母转大写并且转成复数</li>
+        </ul>
+        <h4>特殊方法</h4>
+        <ul>
+            <li>addSeparatorComma // 作用在 For 循环里面，增加逗号分隔符</li>
+        </ul>
+        <h4>SQL 解析出来的格式如下，解析后的对象会打印在控制台中。</h4>
+        <pre>
+{
+    tableName: "category",
+    tableComment: "细分品类表",
+    rows: [
+        {
+            fieldName: "nameEn",
+            dataType: "string", // string, int, timestamp, double 
+            isOptional: true,
+            fieldComment: "英文全称"
+        }
+    ]
+}
+        </pre>
     </div>
 
     <script src="lib/jquery-3.3.1.js"></script>
