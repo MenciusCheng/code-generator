@@ -101,6 +101,21 @@
     ]
 }
         </pre>
+        <h4>示例 SQL ：</h4>
+        <pre>
+CREATE TABLE `manufacturers` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name_en` varchar(255) NOT NULL COMMENT '英文通用名称',
+    `full_name_en` varchar(255) NOT NULL COMMENT '英文全称',
+    `name_th` varchar(255) NOT NULL COMMENT '泰文通用名称',
+    `full_name_th` varchar(255) NOT NULL COMMENT '泰文全称',
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `created_by` int(11) NOT NULL,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `updated_by` int(11) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='生产商表';
+        </pre>
     </div>
 
     <script src="lib/jquery-3.3.1.js"></script>
