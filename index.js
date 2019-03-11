@@ -119,6 +119,11 @@ function singular(str) {
     return pluralize.singular(str)
 }
 
+// 首字母转大写并且转成复数
+function upperFirstAndPlural(str) {
+    return upperFirst(plural(str))
+}
+
 // 把数据类型转换为Scala的类型
 // 数据类型: string, int, timestamp, double
 // Scala的类型: String, Int, LocalDateTime, BigDecimal
@@ -168,8 +173,8 @@ object =[upperFirst,tableName] extends SnakifiedSprayJsonSupport{
 }
 `;
 
-let = curdSqlTemplate = 
-`def insert=[upperFirst,tableName](request: TCreate=[upperFirst,tableName]Request) {
+let curdSqlTemplate = 
+`  def insert=[upperFirst,tableName](request: TCreate=[upperFirst,tableName]Request) {
     val insertSql = 
       sql"""
         INSERT INTO =[plural,tableName] SET
@@ -199,6 +204,15 @@ let = curdSqlTemplate =
   }
 `;
 
+let metaUITemplate = 
+`INSERT INTO \`metadb\`.\`fields\`(\`id\`, \`domain\`, \`entity\`, \`struct_name\`, \`name\`, \`element\`, \`label\`, \`required\`, \`multi\`, \`format\`, \`editable\`, \`validate\`, \`length\`, \`max_length\`, \`min_length\`, \`regexp\`, \`prompt\`, \`min\`, \`max\`, \`candidates\`, \`candidate_label\`, \`candidate_value\`, \`placeholder\`, \`src_key\`, \`visible\`, \`created_at\`, \`created_by\`, \`updated_at\`, \`updated_by\`, \`disabled\`) 
+VALUES
+=[FOR,rows]
+(62=[forIndex], 'crm', 'T=[upperFirst,tableName]', 'com.isuwang.soa.crm.company.domain.T=[upperFirstAndPlural,tableName]', '=[fieldName]', NULL, '=[fieldComment]', 0, 0, NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NOW(), NULL, NOW(), NULL, NULL)=[SEP,addSeparatorComma]
+=[FOREND]
+;
+`;
+
 (function () {
     // 模板支持的普通方法
     window.supportMethod = {
@@ -208,7 +222,8 @@ let = curdSqlTemplate =
         lowerFirst,
         plural,
         singular,
-        dataTypeToScala
+        dataTypeToScala,
+        upperFirstAndPlural
     }
     // 模板支持的内置方法
     window.supportInterMethod = {
@@ -232,6 +247,8 @@ let = curdSqlTemplate =
             $('#templateTextArea').val(caseClassTemplate)
         } else if (event.target.value == "CURD") {
             $('#templateTextArea').val(curdSqlTemplate)
+        } else if (event.target.value == "metaUI") {
+            $('#templateTextArea').val(metaUITemplate)
         } else if (event.target.value == "自定义") {
             $('#templateTextArea').val("")
         }
