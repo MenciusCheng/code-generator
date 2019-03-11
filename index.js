@@ -204,6 +204,8 @@ object =[upperFirst,tableName] extends SnakifiedSprayJsonSupport{
             $('#templateTextArea').val(thriftTemplate)
         } else if (event.target.value == "case class") {
             $('#templateTextArea').val(caseClassTemplate)
+        } else if (event.target.value == "自定义") {
+            $('#templateTextArea').val("")
         }
     })
 
