@@ -49,6 +49,8 @@ function parseSql(sql) {
             row.fieldComment = matchComment ? matchComment[1] : ''
 
             rows.push(row)
+        } else if (execArray = /^@=\[([\w|_]+),(.+)\]$/.exec(line)) {
+            obj[execArray[1]] = execArray[2]
         }
     })
 
@@ -138,6 +140,20 @@ function dataTypeToScala(str) {
     return ''
 }
 
+// 把数据类型转换为Scala的类型
+// 数据类型: string, int, timestamp, double
+// Scala的类型: String, Int, LocalDateTime, BigDecimal
+function dataTypeToThrift(str) {
+    let types = ['string','int','timestamp','double']
+    let scalaTypes = ['string','i32','i64','double']
+    for (let i = 0; i < types.length; i++) {
+        if (types[i] == str) {
+            return scalaTypes[i]
+        }
+    }
+    return ''
+}
+
 // 增加逗号分隔符
 function addSeparatorComma(obj) {
     return obj.forIndex == obj.forLength ? '' : ','
@@ -154,7 +170,7 @@ struct T=[upperFirst,tableName] {
     /**
     * =[fieldComment]
     **/
-    =[forIndex]: =[dataType] =[fieldName]
+    =[forIndex]: =[dataTypeToThrift,dataType] =[fieldName]
 =[FOREND]
 }
 `;
@@ -223,6 +239,7 @@ VALUES
         plural,
         singular,
         dataTypeToScala,
+        dataTypeToThrift,
         upperFirstAndPlural
     }
     // 模板支持的内置方法
