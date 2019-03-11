@@ -229,6 +229,41 @@ VALUES
 ;
 `;
 
+let serviceTemplate = 
+`namespace java com.ipolymer.soa.productdb.service
+include "=[tableName]_domain.thrift"
+
+/**
+* =[serviceName]服务
+**/
+service =[upperFirst,tableName]Service {
+    /**
+    * 新增=[serviceName]
+    **/
+    void create=[upperFirst,tableName](=[tableName]_domain.TCreate=[upperFirst,tableName]Request request)
+    /**
+    * 更新=[serviceName]
+    **/
+    void update=[upperFirst,tableName](=[tableName]_domain.TUpdate=[upperFirst,tableName]Request request)
+    /**
+    * 删除=[serviceName]
+    **/
+    void delete=[upperFirst,tableName]ById(i32 id)
+    /**
+    * 通过id获取=[serviceName]
+    **/
+    =[tableName]_domain.T=[upperFirst,tableName] find=[upperFirst,tableName]ById(i32 id)
+    /**
+    * 查询所有=[serviceName]
+    */
+    list<=[tableName]_domain.T=[upperFirst,tableName]> findAll=[upperFirstAndPlural,tableName]()
+    /**
+    * 分页查询=[serviceName]
+    **/
+    =[tableName]_domain.TFind=[upperFirst,tableName]PageResponse find=[upperFirst,tableName]Page(=[tableName]_domain.TFind=[upperFirst,tableName]PageRequest request)
+}
+`;
+
 (function () {
     // 模板支持的普通方法
     window.supportMethod = {
@@ -266,6 +301,8 @@ VALUES
             $('#templateTextArea').val(curdSqlTemplate)
         } else if (event.target.value == "metaUI") {
             $('#templateTextArea').val(metaUITemplate)
+        } else if (event.target.value == "service") {
+            $('#templateTextArea').val(serviceTemplate)
         } else if (event.target.value == "自定义") {
             $('#templateTextArea').val("")
         }

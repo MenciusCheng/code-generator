@@ -33,6 +33,7 @@
                     <option value="case class">case class</option>
                     <option value="CURD">CURD</option>
                     <option value="metaUI">metaUI</option>
+                    <option value="service">service</option>
                     <option value="自定义">自定义</option>
                     <!-- <option value="自定义一号">自定义一号(保存在cookie中)</option>
                     <option value="自定义二号">自定义二号</option> -->
@@ -52,9 +53,10 @@
 
     <div class="row">
         <h4>说明</h4>
-        <p>模板格式：=[属性名], =[通用方法,属性名], =[SEP,特殊方法名], =[FOR,属性名], =[FOREND], =[IF,属性名], =[IFEND]</p>
+        <p>模板格式：=[属性名], =[通用方法,属性名], =[SEP,特殊方法名], =[FOR,属性名], =[FOREND], =[IF,属性名], =[IFEND], @=[自定义属性名,属性值]</p>
         <p>通用方法：camelize, underScore, upperFirst, lowerFirst, plural, singular, dataTypeToScala, dataTypeToThrift, upperFirstAndPlural</p>
         <p>特殊方法：addSeparatorComma</p>
+        <p>自定义参数：比如模板 service 里面，可以在SQL那里加一行 @=[serviceName,生产商]</p>
         <p>SQL 解析出来的格式如下，解析后的对象会打印在控制台中。</p>
         <p>
             {<br>
