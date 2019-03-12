@@ -203,22 +203,22 @@ struct T=[upperFirst,tableName] {
     **/
     =[forIndex]:=[IF,isOptional] optional[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
 =[FOREND]
-}
-`;
+}`;
 
 let caseClassTemplate =
-`case class =[upperFirst,tableName] ( 
+`import java.time.LocalDateTime
+import com.isuwang.scala_commons.sql.ResultSetMapper
+
+case class =[upperFirst,tableName] (
 =[FOR,rows]
-/** =[fieldComment] */ 
+/** =[fieldComment] */
 =[fieldName]: =[IF,isOptional]Option[[IFEND]=[dataTypeToScala,dataType]=[IF,isOptional]][IFEND]=[SEP,addSeparatorComma]
 =[FOREND]
-) 	
-    
-object =[upperFirst,tableName] extends SnakifiedSprayJsonSupport{
-    implicit val =[tableName]Format = jsonFormat16(=[upperFirst,tableName].apply)
-        implicit val resultSetMapper: ResultSetMapper[=[upperFirst,tableName]] = ResultSetMapper.material[=[upperFirst,tableName]]
-}
-`;
+)
+
+object =[upperFirst,tableName] {
+  implicit val resultSetMapper: ResultSetMapper[=[upperFirst,tableName]] = ResultSetMapper.material[=[upperFirst,tableName]]
+}`;
 
 let curdSqlTemplate = 
 `  def insert=[upperFirst,tableName](request: TCreate=[upperFirst,tableName]Request) {
