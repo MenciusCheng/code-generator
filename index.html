@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>代码生成器</title>
+    <title>代码生成器 - 重复性工作交给我吧</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -14,20 +14,26 @@
     <h3>代码生成器</h3>
     <div class="row">
         <div class="col">
-            <div>sql</div>
+            <div>待解析文本</div>
             <div>
                 <textarea name="sqlTextArea" id="sqlTextArea" cols="60" rows="30" wrap="off"></textarea>
             </div>
             <div>
-                <button id="parseSqlButton">解析</button>
+                <label for="parserSelect">解析器:</label>
+                <select id="parserSelect">
+                    <option value="parseSql">sql</option>
+                    <option value="parseThrift">thrift</option>
+                </select>
+                <button id="parseSqlButton">解析并渲染</button>
             </div>
         </div>
         <div class="col">
-            <div>模板</div>
+            <div>渲染模板</div>
             <div>
                 <textarea name="templateTextArea" id="templateTextArea" cols="60" rows="30" wrap="off"></textarea>
             </div>
             <div>
+                <label for="templateSelect">模板:</label>
                 <select id="templateSelect">
                     <option value="thrift">thrift</option>
                     <option value="case class">case class</option>
@@ -53,11 +59,14 @@
 
     <h3>说明</h3>
     <div class="row">
+        <p>代码生成器旨在减少你的重复性工作。</p>
         <p>这个代码生成器会先把 SQL 解析成一个对象，再根据模板取出对象的属性，生成代码。</p>
+        <h4>新的解析器</h4>
+        <p>现在你可以选择更多的解析器了，但是 thrift 解析器还没有对应的内置渲染模板，需要你去自定义渲染模板。想要更多的解析器和渲染模板，可以跟我联系。</p>
         <h4>模板格式</h4>
         <ul>
             <li>=[属性名] // 获取指定属性名的值</li>
-            <li>=[通用方法,属性名] // 可以在通用方法列表里面选择你要的方法，然后这个方法会作用在指定的属性名上。注意：里面不能有空格。想要更多的方法？等你来建议。</li>
+            <li>=[通用方法,属性名] // 可以在通用方法列表里面选择你要的方法，然后这个方法会作用在指定的属性名上。注意：里面不能有空格。</li>
             <li>=[SEP,特殊方法名] // 可以在特殊方法列表里面选择你要的方法。</li>
             <li>For 循环，循环指定的属性数组，并且可以在里面使用 forIndex 和 forLength 属性。注意：目前的属性数组只有 rows</li>
             <pre>
@@ -81,6 +90,7 @@
             <li>dataTypeToScala // 把数据类型转换为Scala的类型</li>
             <li>dataTypeToThrift // 把数据类型转换为Thrift的类型</li>
             <li>upperFirstAndPlural // 首字母转大写并且转成复数</li>
+            <li>......想要更多的方法？等你来建议。</li>
         </ul>
         <h4>特殊方法</h4>
         <ul>
@@ -116,6 +126,13 @@ CREATE TABLE `manufacturers` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='生产商表';
         </pre>
+
+        <h4>联系方式</h4>
+        <p>作者：Marvel Cheng</p>
+        <p>Email: 295567172@qq.com</p>
+
+        <h4>源码地址</h4>
+        <p><a href="https://github.com/MenciusCheng/code-generator" target="_blank">https://github.com/MenciusCheng/code-generator</a></p>
     </div>
 
     <script src="lib/jquery-3.3.1.js"></script>

@@ -57,6 +57,37 @@ function parseSql(sql) {
     return obj
 }
 
+// 解析 Thrift struct 为一个对象
+function parseThrift(text) {
+    function createRow() {
+        return {
+            fieldName: "",
+            dataType: "",
+            isOptional: false
+        }
+    }
+    let rows = []
+    let obj = {
+        tableName: "",
+        rows
+    }
+    let execArray = null
+
+    text.split("\n").forEach(line => {
+        if (execArray = /^struct (\w+)/.exec(line)) {
+            obj.tableName = execArray[1]
+        } else if (execArray = /^\s+\d\s*:(\s+optional)?\s+(\w+)\s+(\w+)/.exec(line)) {
+            let row = createRow()
+            row.fieldName = execArray[3]
+            row.dataType = execArray[2]
+            row.isOptional = !!execArray[1]
+            rows.push(row)
+        }
+    })
+
+    return obj
+}
+
 // 通过模板格式来渲染对象
 function transform(textArr, obj, templateArr) {
     for (let i = 0; i < templateArr.length; i++) {
@@ -140,7 +171,7 @@ function dataTypeToScala(str) {
     return ''
 }
 
-// 把数据类型转换为Scala的类型
+// 把数据类型转换为Thrift的类型
 // 数据类型: string, int, timestamp, double
 // Scala的类型: String, Int, LocalDateTime, BigDecimal
 function dataTypeToThrift(str) {
@@ -264,6 +295,10 @@ service =[upperFirst,tableName]Service {
 }
 `;
 
+function parse() {
+
+}
+
 (function () {
     // 模板支持的普通方法
     window.supportMethod = {
@@ -281,9 +316,16 @@ service =[upperFirst,tableName]Service {
     window.supportInterMethod = {
         addSeparatorComma
     }
+    // 支持的内置解析器
+    window.supportParser = {
+        parseSql,
+        parseThrift
+    }
 
     $('#parseSqlButton').bind("click", function (event) {
-        let obj = parseSql($('#sqlTextArea').val())
+        let sqlText = $('#sqlTextArea').val()
+        let parser = window.supportParser[$("#parserSelect").val()]
+        let obj = parser(sqlText)
         console.log(obj)
 
         let textArr = [];
