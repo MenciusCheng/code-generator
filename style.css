@@ -6,10 +6,31 @@
 .col {
     display: inline-block;
     vertical-align: top;
+    margin: 0 10px 10px 0;
 }
 
 .new_flag {
     color: crimson;
     font-size: small;
     font-style: italic;
+}
+
+#editor {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+nav {
+    display: inline-block;
+    font-size: larger;
+    margin-bottom: 10px;
+}
+
+nav a {
+    margin: 0 0 0 20px;
+}
+
+nav span {
+    margin: 0 0 0 20px;
+    font-weight: bolder
 }
