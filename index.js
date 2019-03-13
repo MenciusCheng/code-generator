@@ -7,17 +7,21 @@ function parseSql(sql) {
             dataType: "", // string, int, timestamp, double
             isOptional: false,
             fieldComment: "",
-            isPrimaryKey: false,
-            isUniqueKey: false
+            isPrimaryKey: false, // 是否主键
+            isUniqueKey: false, // 是否唯一键
+            isCommonField: false // 通用字段，除了主键和创建修改信息字段
         }
     }
     let rows = []
     let obj = {
         tableName: "",
         tableComment: "",
-        rows
+        rows,
+        primaryKeyName: "",
+        primaryKeyDataType: ""
     }
     let execArray = null
+    let uncommonFieldList = ["createdAt","createdBy","updatedAt","updatedBy"]
 
     sql.split("\n").forEach(line => {
 
@@ -47,12 +51,19 @@ function parseSql(sql) {
             let matchComment = /COMMENT \'(.+)\'/i.exec(line)
             row.fieldComment = matchComment ? matchComment[1] : ''
 
+            row.isCommonField = !uncommonFieldList.some(e => e === row.fieldName)
+
             rows.push(row)
         } else if (execArray = /^\s*PRIMARY KEY \(`(\w+)`\)/.exec(line)) {
             // 匹配主键
             let fieldName = camelize(execArray[1])
             let row = rows.find(r => r.fieldName === fieldName)
-            if (row) { row.isPrimaryKey = true }
+            if (row) { 
+                row.isPrimaryKey = true
+                row.isCommonField = false // 把主键移出通用字段
+                obj.primaryKeyName = row.fieldName
+                obj.primaryKeyDataType = row.dataType
+            }
         } else if (execArray = /^\s*UNIQUE KEY[`\w\s]* \(`(\w+)`\)/.exec(line)) {
             // 匹配唯一索引
             let fieldName = camelize(execArray[1])
@@ -134,6 +145,7 @@ function transform(textArr, obj, templateArr) {
                     .replace(/=\[SEP,(\w+)\]/g, (_, fn) => window.supportInterMethod[fn] ? window.supportInterMethod[fn](obj) : '')
                     .replace(/=\[(\w+)\]/g, (_, field) => obj[field])
                     .replace(/=\[(\w+),(\w+)\]/g, (_, fn, field) => window.supportMethod[fn] ? window.supportMethod[fn](obj[field]) : '')
+                    .replace(/=\[(\w+),(\w+),(\w+)\]/g, (_, fn, field, param) => window.supportMethod[fn] ? window.supportMethod[fn](obj[field],param) : '')
             textArr.push(el);
         }
     }
@@ -207,9 +219,34 @@ function dataTypeToThrift(str) {
     return ''
 }
 
-// 增加逗号分隔符
+// 增加逗号分隔符，循环体里使用
 function addSeparatorComma(obj) {
     return obj.forIndex == obj.forLength ? '' : ','
+}
+
+// 增加加号分隔符，循环体里使用
+function addSeparatorPlus(obj) {
+    return obj.forIndex == obj.forLength ? '' : '+'
+}
+
+// 增加加号分隔符，通用字段的循环体使用
+function addSeparatorPlusForCF(obj) {
+    return obj.forIndex >= (obj.forLength - 4) ? '' : '+'
+}
+
+// 整数相加
+function addInt(a, b) {
+    return parseInt(a) + parseInt(b)
+}
+
+// 整数相减
+function minusInt(a, b) {
+    return parseInt(a) - parseInt(b)
+}
+
+// 去掉字符串最后一个字符
+function strReTail(str) {
+    return str ? str.slice(0, str.length - 1) : ''
 }
 
 (function () {
@@ -221,13 +258,18 @@ function addSeparatorComma(obj) {
         lowerFirst,
         plural,
         singular,
+        upperFirstAndPlural,
         dataTypeToScala,
         dataTypeToThrift,
-        upperFirstAndPlural
+        addInt,
+        minusInt,
+        strReTail
     }
     // 模板支持的内置方法
     window.supportInterMethod = {
-        addSeparatorComma
+        addSeparatorComma,
+        addSeparatorPlus,
+        addSeparatorPlusForCF
     }
     // 支持的内置解析器
     window.supportParser = {
