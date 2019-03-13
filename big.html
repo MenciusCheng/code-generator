@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>代码生成器 V0.1</title>
+    <title>代码生成器 V0.2</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -20,7 +20,7 @@
         <div class="col">
             <div>待解析文本</div>
             <div>
-                <textarea name="sqlTextArea" id="sqlTextArea" cols="60" rows="30" wrap="off"></textarea>
+                <textarea name="sqlTextArea" id="sqlTextArea" cols="90" rows="30" wrap="off"></textarea>
             </div>
             <div>
                 <label for="parserSelect">解析器:</label>
@@ -34,19 +34,12 @@
         <div class="col">
             <div>渲染模板</div>
             <div>
-                <textarea name="templateTextArea" id="templateTextArea" cols="60" rows="30" wrap="off"></textarea>
+                <textarea name="templateTextArea" id="templateTextArea" cols="90" rows="30" wrap="off"></textarea>
             </div>
             <div>
                 <label for="templateSelect">模板:</label>
                 <select id="templateSelect">
-                    <option value="thriftTemplate">thrift</option>
-                    <option value="caseClassTemplate">case class</option>
-                    <option value="curdSqlTemplate">CURD</option>
-                    <option value="metaUITemplate">metaUI</option>
-                    <option value="serviceTemplate">service</option>
-                    <option value="blankTemplate">自定义</option>
-                    <!-- <option value="自定义一号">自定义一号(保存在cookie中)</option>
-                    <option value="自定义二号">自定义二号</option> -->
+                    <option value="bigTemplate">大杀器</option>
                 </select>
             </div>
         </div>

@@ -79,7 +79,7 @@ function getResultTextArea(id, fileName) {
     return `<div class="col resultTextArea">
         <div><span>${fileName}</span></div>
         <div>
-            <textarea name="resultTextArea${id}" id="resultTextArea${id}" cols="60" rows="30" wrap="off"></textarea>
+            <textarea name="resultTextArea${id}" id="resultTextArea${id}" cols="90" rows="30" wrap="off"></textarea>
         </div>
         <div>
             <button id="copyResultButton${id}" data-clipboard-target="#resultTextArea${id}">复制</button>&nbsp;&nbsp;&nbsp;&nbsp;<span>${fileName}</span>
