@@ -7,3 +7,9 @@
     display: inline-block;
     vertical-align: top;
 }
+
+.new_flag {
+    color: crimson;
+    font-size: small;
+    font-style: italic;
+}

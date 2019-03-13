@@ -8,9 +8,11 @@
 **/
 struct T=[upperFirst,tableName] {
 =[FOR,rows]
+=[IFM,fieldComment]
     /**
     * =[fieldComment]
     **/
+=[IFMEND]
     =[forIndex]:=[IF,isOptional] optional[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
 =[FOREND]
 }`;

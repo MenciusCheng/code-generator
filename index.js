@@ -102,15 +102,27 @@ function parseThrift(text) {
 function transform(textArr, obj, templateArr) {
     for (let i = 0; i < templateArr.length; i++) {
         const templateLine = templateArr[i];
-        let matchFor = /^\s*=\[FOR,(\w+)\]$/.exec(templateLine)
-        if (matchFor) {
+        let execArray = null
+        if (execArray = /^\s*=\[IFM,(\w+)\]\s*/.exec(templateLine)) {
+            // 多行 If
             let tempArr = [];
             i += 1;
-            while (!/^\s*=\[FOREND\]$/.test(templateArr[i])) {
+            while (!/^\s*=\[IFMEND\]\s*/.test(templateArr[i])) {
                 tempArr.push(templateArr[i]);
                 i += 1;
             }
-            let arr = obj[matchFor[1]]
+            if (obj[execArray[1]]) {
+                transform(textArr, obj, tempArr)
+            }
+        } else if (execArray = /^\s*=\[FOR,(\w+)\]\s*/.exec(templateLine)) {
+            // For 循环
+            let tempArr = [];
+            i += 1;
+            while (!/^\s*=\[FOREND\]\s*/.test(templateArr[i])) {
+                tempArr.push(templateArr[i]);
+                i += 1;
+            }
+            let arr = obj[execArray[1]]
             arr.forEach((v, k) => {
                 let value = Object.assign({forIndex: k + 1, forLength: arr.length}, obj, v)
                 transform(textArr, value, tempArr)
