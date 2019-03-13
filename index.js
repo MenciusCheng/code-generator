@@ -1,9 +1,3 @@
-/*
-保留的属性名
-forIndex
-forLength
-*/
-
 
 // 解析创建表 SQL 为一个对象
 function parseSql(sql) {
@@ -12,7 +6,9 @@ function parseSql(sql) {
             fieldName: "",
             dataType: "", // string, int, timestamp, double
             isOptional: false,
-            fieldComment: ""
+            fieldComment: "",
+            isPrimaryKey: false,
+            isUniqueKey: false
         }
     }
     let rows = []
@@ -25,11 +21,14 @@ function parseSql(sql) {
 
     sql.split("\n").forEach(line => {
 
-        if (execArray = /^CREATE TABLE `([\w|_]+)`/i.exec(line)) {
+        if (execArray = /^CREATE TABLE `(\w+)`/i.exec(line)) {
+            // 匹配表名
             obj.tableName = singular(camelize(execArray[1]))
         } else if (execArray = /COMMENT=\'(.+)\';$/.exec(line)) {
+            // 匹配表备注
             obj.tableComment = execArray[1]
-        } else if (execArray = /^\s*`([\w|_]+)`/.exec(line)) {
+        } else if (execArray = /^\s*`(\w+)`/.exec(line)) {
+            // 匹配表字段
             let row = createRow()
             row.fieldName = camelize(execArray[1])
 
@@ -49,7 +48,18 @@ function parseSql(sql) {
             row.fieldComment = matchComment ? matchComment[1] : ''
 
             rows.push(row)
-        } else if (execArray = /^@=\[([\w|_]+),(.+)\]$/.exec(line)) {
+        } else if (execArray = /^\s*PRIMARY KEY \(`(\w+)`\)/.exec(line)) {
+            // 匹配主键
+            let fieldName = camelize(execArray[1])
+            let row = rows.find(r => r.fieldName === fieldName)
+            if (row) { row.isPrimaryKey = true }
+        } else if (execArray = /^\s*UNIQUE KEY[`\w\s]* \(`(\w+)`\)/.exec(line)) {
+            // 匹配唯一索引
+            let fieldName = camelize(execArray[1])
+            let row = rows.find(r => r.fieldName === fieldName)
+            if (row) { row.isUniqueKey = true }
+        } else if (execArray = /^@=\[(\w+),(.+)\]$/.exec(line)) {
+            // 匹配自定义变量
             obj[execArray[1]] = execArray[2]
         }
     })
@@ -190,115 +200,6 @@ function addSeparatorComma(obj) {
     return obj.forIndex == obj.forLength ? '' : ','
 }
 
-// ========= 内置模板 ========= 
-
-let thriftTemplate =
-`/**
-* =[tableComment]
-**/
-struct T=[upperFirst,tableName] {
-=[FOR,rows]
-    /**
-    * =[fieldComment]
-    **/
-    =[forIndex]:=[IF,isOptional] optional[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
-=[FOREND]
-}`;
-
-let caseClassTemplate =
-`import java.time.LocalDateTime
-import com.isuwang.scala_commons.sql.ResultSetMapper
-
-case class =[upperFirst,tableName] (
-=[FOR,rows]
-/** =[fieldComment] */
-=[fieldName]: =[IF,isOptional]Option[[IFEND]=[dataTypeToScala,dataType]=[IF,isOptional]][IFEND]=[SEP,addSeparatorComma]
-=[FOREND]
-)
-
-object =[upperFirst,tableName] {
-  implicit val resultSetMapper: ResultSetMapper[=[upperFirst,tableName]] = ResultSetMapper.material[=[upperFirst,tableName]]
-}`;
-
-let curdSqlTemplate = 
-`  def insert=[upperFirst,tableName](request: TCreate=[upperFirst,tableName]Request) {
-    val insertSql = 
-      sql"""
-        INSERT INTO =[plural,tableName] SET
-  =[FOR,rows]
-          =[underScore,fieldName] = \${request.=[fieldName]}=[SEP,addSeparatorComma]
-  =[FOREND]
-      """
-    datasouce.esql(insertSql)
-  }
-  
-  def updateCategory(request: TUpdateCategoryRequest) {
-    val updateSql = 
-      sql" UPDATE =[plural,tableName] SET " +
-=[FOR,rows]
-      (request.=[fieldName].isDefined).optional(sql"=[underScore,fieldName] = \${request.=[fieldName].get()},") +
-=[FOREND]
-      sql" updated_at = NOW() WHERE id = \${request.id} "
-    datasouce.esql(insertSql)
-  }
-  
-  def get=[upperFirst,tableName]ById(id: Int): Option[=[upperFirst,tableName]] = {
-    datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[plural,tableName] WHERE id = \${id}")
-  }
-  
-  def getAll=[upperFirst,tableName](): List[=[upperFirst,tableName]] = {
-    datasouce.rows[=[upperFirst,tableName]](sql"SELECT * FROM =[plural,tableName] ")
-  }
-`;
-
-let metaUITemplate = 
-`INSERT INTO \`metadb\`.\`fields\`(\`id\`, \`domain\`, \`entity\`, \`struct_name\`, \`name\`, \`element\`, \`label\`, \`required\`, \`multi\`, \`format\`, \`editable\`, \`validate\`, \`length\`, \`max_length\`, \`min_length\`, \`regexp\`, \`prompt\`, \`min\`, \`max\`, \`candidates\`, \`candidate_label\`, \`candidate_value\`, \`placeholder\`, \`src_key\`, \`visible\`, \`created_at\`, \`created_by\`, \`updated_at\`, \`updated_by\`, \`disabled\`) 
-VALUES
-=[FOR,rows]
-(62=[forIndex], 'crm', 'T=[upperFirst,tableName]', 'com.isuwang.soa.crm.company.domain.T=[upperFirstAndPlural,tableName]', '=[fieldName]', NULL, '=[fieldComment]', 0, 0, NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NOW(), NULL, NOW(), NULL, NULL)=[SEP,addSeparatorComma]
-=[FOREND]
-;
-`;
-
-let serviceTemplate = 
-`namespace java com.ipolymer.soa.productdb.service
-include "=[tableName]_domain.thrift"
-
-/**
-* =[serviceName]服务
-**/
-service =[upperFirst,tableName]Service {
-    /**
-    * 新增=[serviceName]
-    **/
-    void create=[upperFirst,tableName](=[tableName]_domain.TCreate=[upperFirst,tableName]Request request)
-    /**
-    * 更新=[serviceName]
-    **/
-    void update=[upperFirst,tableName](=[tableName]_domain.TUpdate=[upperFirst,tableName]Request request)
-    /**
-    * 删除=[serviceName]
-    **/
-    void delete=[upperFirst,tableName]ById(i32 id)
-    /**
-    * 通过id获取=[serviceName]
-    **/
-    =[tableName]_domain.T=[upperFirst,tableName] find=[upperFirst,tableName]ById(i32 id)
-    /**
-    * 查询所有=[serviceName]
-    */
-    list<=[tableName]_domain.T=[upperFirst,tableName]> findAll=[upperFirstAndPlural,tableName]()
-    /**
-    * 分页查询=[serviceName]
-    **/
-    =[tableName]_domain.TFind=[upperFirst,tableName]PageResponse find=[upperFirst,tableName]Page(=[tableName]_domain.TFind=[upperFirst,tableName]PageRequest request)
-}
-`;
-
-function parse() {
-
-}
-
 (function () {
     // 模板支持的普通方法
     window.supportMethod = {
@@ -335,22 +236,11 @@ function parse() {
     })
 
     $('#templateSelect').bind("change", function (event) {
-        if (event.target.value == "thrift") {
-            $('#templateTextArea').val(thriftTemplate)
-        } else if (event.target.value == "case class") {
-            $('#templateTextArea').val(caseClassTemplate)
-        } else if (event.target.value == "CURD") {
-            $('#templateTextArea').val(curdSqlTemplate)
-        } else if (event.target.value == "metaUI") {
-            $('#templateTextArea').val(metaUITemplate)
-        } else if (event.target.value == "service") {
-            $('#templateTextArea').val(serviceTemplate)
-        } else if (event.target.value == "自定义") {
-            $('#templateTextArea').val("")
-        }
+        let template = window.supportTemplate[event.target.value]
+        $('#templateTextArea').val(template)
     })
 
-    $('#templateTextArea').val(thriftTemplate)
+    $('#templateTextArea').val(window.supportTemplate["thriftTemplate"])
 
     new ClipboardJS('#copyResultButton');
 })();

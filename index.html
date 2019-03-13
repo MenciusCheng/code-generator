@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>代码生成器 - 重复性工作交给我吧</title>
+    <title>代码生成器 V0.1</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -35,12 +35,12 @@
             <div>
                 <label for="templateSelect">模板:</label>
                 <select id="templateSelect">
-                    <option value="thrift">thrift</option>
-                    <option value="case class">case class</option>
-                    <option value="CURD">CURD</option>
-                    <option value="metaUI">metaUI</option>
-                    <option value="service">service</option>
-                    <option value="自定义">自定义</option>
+                    <option value="thriftTemplate">thrift</option>
+                    <option value="caseClassTemplate">case class</option>
+                    <option value="curdSqlTemplate">CURD</option>
+                    <option value="metaUITemplate">metaUI</option>
+                    <option value="serviceTemplate">service</option>
+                    <option value="blankTemplate">自定义</option>
                     <!-- <option value="自定义一号">自定义一号(保存在cookie中)</option>
                     <option value="自定义二号">自定义二号</option> -->
                 </select>
@@ -135,10 +135,11 @@ CREATE TABLE `manufacturers` (
         <p><a href="https://github.com/MenciusCheng/code-generator" target="_blank">https://github.com/MenciusCheng/code-generator</a></p>
     </div>
 
-    <script src="lib/jquery-3.3.1.js"></script>
-    <script src="lib/clipboard.min.js"></script>
-    <script src="lib/pluralize.js"></script>
-    <script src="index.js"></script>
+    <script src="./lib/jquery-3.3.1.js"></script>
+    <script src="./lib/clipboard.min.js"></script>
+    <script src="./lib/pluralize.js"></script>
+    <script src="./codeTemplate.js"></script>
+    <script src="./index.js"></script>
 </body>
 
 </html>
