@@ -9,7 +9,8 @@ function parseSql(sql) {
             fieldComment: "",
             isPrimaryKey: false, // 是否主键
             isUniqueKey: false, // 是否唯一键
-            isCommonField: false // 通用字段，除了主键和创建修改信息字段
+            isCommonField: false, // 通用字段，除了主键和创建修改信息字段
+            isAutoIncrement: false // 是否自增
         }
     }
     let rows = []
@@ -23,7 +24,7 @@ function parseSql(sql) {
         primaryKeyDataType: ""
     }
     let execArray = null
-    let uncommonFieldList = ["createdAt","createdBy","updatedAt","updatedBy"]
+    let uncommonFieldList = ["id","createdAt","createdBy","updatedAt","updatedBy"]
 
     sql.split("\n").forEach(line => {
 
@@ -57,6 +58,8 @@ function parseSql(sql) {
 
             row.isCommonField = !uncommonFieldList.some(e => e === row.fieldName)
 
+            row.isAutoIncrement = line.indexOf(" AUTO_INCREMENT") > -1
+
             rows.push(row)
         } else if (execArray = /^\s*PRIMARY KEY \(`(\w+)`\)/.exec(line)) {
             // 匹配主键
@@ -64,7 +67,6 @@ function parseSql(sql) {
             let row = rows.find(r => r.fieldName === fieldName)
             if (row) { 
                 row.isPrimaryKey = true
-                row.isCommonField = false // 把主键移出通用字段
                 obj.primaryKeyName = row.fieldName
                 obj.primaryKeyNameOrigin = row.fieldNameOrigin
                 obj.primaryKeyDataType = row.dataType
@@ -79,6 +81,8 @@ function parseSql(sql) {
             obj[execArray[1]] = execArray[2]
         }
     })
+
+    obj.commonFields = obj.rows.filter(r => uncommonFieldList.every(u => u !== r.fieldName))
 
     return obj
 }
@@ -120,14 +124,12 @@ function transform(textArr, obj, templateArr) {
         const templateLine = templateArr[i]
         let execArray = null
         if (execArray = /^\s*=\[IFM,(!)?(\w+)\]\s*/.exec(templateLine)) {
-            console.log("IFM " + execArray[1] + obj[execArray[2]])
             // 多行 If
             let tempArr = []
             let ifmCount = 1 // 条件语句计数器
             i += 1 // 读取下一行
             while (ifmCount > 0) {
                 const tempLine = templateArr[i]
-                console.log("ForWhile: " + tempLine)
                 if (/^\s*=\[IFM,(!)?(\w+)\]\s*/.test(tempLine)) {
                     ifmCount += 1
                 } else if (/^\s*=\[IFMEND\]\s*/.test(tempLine)) {

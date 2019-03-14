@@ -22,24 +22,18 @@ struct T=[upperFirst,tableName] {
 }
 
 struct TCreate=[upperFirst,tableName]Request {
-=[FOR,rows]
-=[IFM,isCommonField]
+=[FOR,commonFields]
     /**
     * =[fieldComment]
     **/
-    =[minusInt,forIndex,1]: =[dataTypeToThrift,dataType] =[fieldName]
-=[IFMEND]
+    =[forIndex]:=[IF,isOptional] optional[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
 =[FOREND]
 }
 
 struct TUpdate=[upperFirst,tableName]Request {
-=[FOR,rows]
-=[IFM,isPrimaryKey]
-    1: =[dataTypeToThrift,dataType] =[fieldName]
-=[IFMEND]
-=[FOREND]
-=[FOR,rows]
-=[IFM,isCommonField]
+    1: =[dataTypeToThrift,primaryKeyDataType] =[primaryKeyName]
+=[FOR,commonFields]
+=[IFM,!isPrimaryKey]
     /**
     * =[fieldComment]
     **/
@@ -50,13 +44,11 @@ struct TUpdate=[upperFirst,tableName]Request {
 
 struct TFind=[upperFirst,tableName]PageRequest {
     1: base_model.TPageRequest pageRequest
-=[FOR,rows]
-=[IFM,isCommonField]
+=[FOR,commonFields]
     /**
     * =[fieldComment]
     **/
-    =[forIndex]: optional =[dataTypeToThrift,dataType] =[fieldName]
-=[IFMEND]
+    =[addInt,forIndex,1]: optional =[dataTypeToThrift,dataType] =[fieldName]
 =[FOREND]
 }
 
@@ -69,7 +61,7 @@ struct TFind=[upperFirst,tableName]PageResponse {
     let thrfitServiceTemplate = 
 `file:=[singular,tableNameOrigin]_service.thrift
 namespace java com.ipolymer.soa.productdb.service
-include "=[tableName]_domain.thrift"
+include "=[singular,tableNameOrigin]_domain.thrift"
 
 /**
 * =[strReTail,tableComment]服务
@@ -78,11 +70,11 @@ service =[upperFirst,tableName]Service {
     /**
     * 新增=[strReTail,tableComment]
     **/
-    void create=[upperFirst,tableName](=[tableName]_domain.TCreate=[upperFirst,tableName]Request request)
+    void create=[upperFirst,tableName](=[singular,tableNameOrigin]_domain.TCreate=[upperFirst,tableName]Request request)
     /**
     * 更新=[strReTail,tableComment]
     **/
-    void update=[upperFirst,tableName](=[tableName]_domain.TUpdate=[upperFirst,tableName]Request request)
+    void update=[upperFirst,tableName](=[singular,tableNameOrigin]_domain.TUpdate=[upperFirst,tableName]Request request)
     /**
     * 删除=[strReTail,tableComment]
     **/
@@ -90,15 +82,34 @@ service =[upperFirst,tableName]Service {
     /**
     * 通过=[primaryKeyName]查询=[strReTail,tableComment]
     **/
-    =[tableName]_domain.T=[upperFirst,tableName] find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[dataTypeToThrift,primaryKeyDataType] =[primaryKeyName])
+    =[singular,tableNameOrigin]_domain.T=[upperFirst,tableName] find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[dataTypeToThrift,primaryKeyDataType] =[primaryKeyName])
     /**
     * 查询所有=[strReTail,tableComment]
     */
-    list<=[tableName]_domain.T=[upperFirst,tableName]> findAll=[upperFirstAndPlural,tableName]()
+    list<=[singular,tableNameOrigin]_domain.T=[upperFirst,tableName]> findAll=[upperFirstAndPlural,tableName]()
     /**
     * 分页查询=[strReTail,tableComment]
     **/
-    =[tableName]_domain.TFind=[upperFirst,tableName]PageResponse find=[upperFirst,tableName]Page(=[tableName]_domain.TFind=[upperFirst,tableName]PageRequest request)
+    =[singular,tableNameOrigin]_domain.TFind=[upperFirst,tableName]PageResponse find=[upperFirst,tableName]Page(=[singular,tableNameOrigin]_domain.TFind=[upperFirst,tableName]PageRequest request)
+}
+`;
+
+    let caseClassTemplate =
+`file:=[upperFirst,tableName].scala
+package com.ipolymer.soa.=[soaName].scala.domain
+
+import java.time.LocalDateTime
+import com.isuwang.scala_commons.sql.ResultSetMapper
+
+case class =[upperFirst,tableName] (
+=[FOR,rows]
+/** =[fieldComment] */
+=[fieldName]: =[IF,isOptional]Option[[IFEND]=[dataTypeToScala,dataType]=[IF,isOptional]][IFEND]=[SEP,addSeparatorComma]
+=[FOREND]
+)
+
+object =[upperFirst,tableName] {
+    implicit val resultSetMapper: ResultSetMapper[=[upperFirst,tableName]] = ResultSetMapper.material[=[upperFirst,tableName]]
 }
 `;
 
@@ -133,13 +144,13 @@ def findAll=[upperFirstAndPlural,tableName](): List[=[upperFirst,tableName]] = {
 }
 
 def find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Option[=[upperFirst,tableName]] = {
-  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[tableNameOrigin] where =[primaryKeyNameOrigin] = \${=[primaryKeyName]}")
+  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[tableNameOrigin] WHERE =[primaryKeyNameOrigin] = \${=[primaryKeyName]}")
 }
 
-=[FOR,rows]
+=[FOR,commonFields]
 =[IFM,isUniqueKey]
 def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): Option[=[upperFirst,tableName]] = {
-  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[tableNameOrigin] where =[fieldNameOrigin] = \${=[fieldName]}")
+  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[tableNameOrigin] WHERE =[fieldNameOrigin] = \${=[fieldName]}")
 }
 
 =[IFMEND]
@@ -164,8 +175,16 @@ import com.isuwang.scala_commons.sql._
   */
 class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName]Request) extends Action[Unit] {
   override def preCheck: Unit = {
-    assert(=[datasouce].find=[upperFirst,tableName]ByNameEn(request.nameEn).isEmpty, "英文通用名称已存在")
-    assert(=[datasouce].find=[upperFirst,tableName]ByNameTh(request.nameTh).isEmpty, "泰文通用名称已存在")
+=[FOR,commonFields]
+=[IFM,isPrimaryKey]
+=[IFM,!isAutoIncrement]
+    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment]已存在")
+=[IFMEND]
+=[IFMEND]
+=[IFM,isUniqueKey]
+    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment]已存在")
+=[IFMEND]
+=[FOREND]
   }
 
   override def action: Unit = {
@@ -176,10 +195,8 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
     val insertSql =
       sql"""
         INSERT INTO =[tableNameOrigin] SET
-=[FOR,rows]
-=[IFM,isCommonField]
+=[FOR,commonFields]
           =[fieldNameOrigin] = \${request.=[fieldName]},
-=[IFMEND]
 =[FOREND]
           created_by = \${BaseHelper.operatorId},
           updated_by = \${BaseHelper.operatorId}
@@ -213,7 +230,7 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
     assert(request.=[primaryKeyName].isNotEmpty, "=[primaryKeyName] 不能为空")
     assert(=[tableName]Opt.isDefined, "=[strReTail,tableComment]不存在")
 
-=[FOR,rows]
+=[FOR,commonFields]
 =[IFM,isUniqueKey]
     if (request.=[fieldName].isDefined) {
       val =[tableName]By=[upperFirst,fieldName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get)
@@ -230,9 +247,9 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
   private def update=[upperFirst,tableName](request: TUpdate=[upperFirst,tableName]Request): Unit = {
     val updateSql =
       sql" UPDATE =[tableNameOrigin] SET " +
-=[FOR,rows]
-=[IFM,isCommonField]
-        request.=[fieldName].isDefined.optional(sql"=[fieldNameOrigin] = \${request.=[fieldName].get},") +
+=[FOR,commonFields]
+=[IFM,!isPrimaryKey]
+        request.=[fieldName].isDefined.optional(sql" =[fieldNameOrigin] = \${request.=[fieldName].get}, ") +
 =[IFMEND]
 =[FOREND]
         sql" updated_by = \${BaseHelper.operatorId} WHERE =[primaryKeyName] = \${request.=[primaryKeyName]} "
@@ -242,11 +259,12 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
 `;
 
 let deleteActionTemplate = 
-`file:Delete=[upperFirst,tableName]ByIdAction.scala
+`file:Delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action.scala
 package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
 
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
+import com.ipolymer.soa.=[soaName].scala.db.=[datasouce]
 import com.ipolymer.soa.=[soaName].scala.db.=[datasouce].datasouce
 import com.isuwang.commons.converters.SqlImplicits._
 import com.isuwang.commons.converters.Implicits._
@@ -255,9 +273,12 @@ import com.isuwang.scala_commons.sql._
 /**
   * 删除=[strReTail,tableComment]
   */
-class Delete=[upperFirst,tableName]ByIdAction(=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]) extends Action[Unit] {
+class Delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]) extends Action[Unit] {
+  private lazy val =[tableName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
+
   override def preCheck: Unit = {
     assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] 不能为空")
+    assert(=[tableName]Opt.isDefined, "=[strReTail,tableComment]不存在")
   }
 
   override def action: Unit = {
@@ -351,26 +372,35 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
   }
 
   private lazy val whereSql = sql" WHERE 1=1 " +
-=[FOR,rows]
-=[IFM,isCommonField]
-    request.=[fieldName].isDefined.optional(sql" AND =[fieldNameOrigin] = \${request.=[fieldName].get} ") =[SEP,addSeparatorPlusForCF]
-=[IFMEND]
+=[FOR,commonFields]
+    request.=[fieldName].isDefined.optional(sql" AND =[fieldNameOrigin] = \${request.=[fieldName].get} ") =[SEP,addSeparatorPlus]
 =[FOREND]
 
   private def getRows: List[T=[upperFirst,tableName]] = {
     val selectSql = sql"SELECT * FROM =[tableNameOrigin] "
     val orderBySql = sql" ORDER BY \${request.pageRequest.sortFields.getOrElse("updated_at")} DESC "
-    val limitSql = sql" limit \${request.pageRequest.start}, \${request.pageRequest.limit} "
+    val limitSql = sql" LIMIT \${request.pageRequest.start}, \${request.pageRequest.limit} "
     datasouce.rows[=[upperFirst,tableName]](selectSql + whereSql + orderBySql + limitSql).map(it => BeanBuilder.build[T=[upperFirst,tableName]](it)())
   }
 }
 `;
 
-    let bigTemplate = thriftDomainTemplate + thrfitServiceTemplate + serviceImplTemplate + dbTemplate + createActionTemplate + updateActionTemplate + deleteActionTemplate + findByKeyActionTemplate + findAllActionTemplate + findPageActionTemplate;
+    let bigTemplate = thriftDomainTemplate + 
+        thrfitServiceTemplate + 
+        caseClassTemplate + 
+        serviceImplTemplate + 
+        dbTemplate + 
+        createActionTemplate + 
+        updateActionTemplate + 
+        deleteActionTemplate + 
+        findByKeyActionTemplate + 
+        findAllActionTemplate + 
+        findPageActionTemplate;
 
     window.supportTemplate = {
         thriftDomainTemplate,
         thrfitServiceTemplate,
+        caseClassTemplate,
         serviceImplTemplate,
         dbTemplate,
         createActionTemplate,
