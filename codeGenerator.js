@@ -138,14 +138,12 @@ function transform(textArr, obj, templateArr) {
 
                 if (ifmCount > 0) {
                     tempArr.push(tempLine)
-                    i +=1
+                    i += 1
+                    if (i > templateArr.length) {
+                        break
+                    }
                 }
             }
-
-            // while (!/^\s*=\[IFMEND\]\s*/.test(templateArr[i])) {
-            //     tempArr.push(templateArr[i]);
-            //     i += 1;
-            // }
 
             let negation = !!execArray[1] // 有 ！则为 true， 没有 ! 则为 false
             let condition = !!obj[execArray[2]]
@@ -159,6 +157,9 @@ function transform(textArr, obj, templateArr) {
             while (!/^\s*=\[FOREND\]\s*/.test(templateArr[i])) {
                 tempArr.push(templateArr[i]);
                 i += 1;
+                if (i > templateArr.length) {
+                    break
+                }
             }
             let arr = obj[execArray[1]]
             arr.forEach((v, k) => {
