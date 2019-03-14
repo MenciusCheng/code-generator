@@ -3,7 +3,7 @@
 (function () {
 
     let thriftDomainTemplate = 
-`file:=[tableName]_domain.thrift
+`file:=[singular,tableNameOrigin]_domain.thrift
 namespace java com.ipolymer.soa.productdb.domain
 include "base_model.thrift"
 
@@ -67,7 +67,7 @@ struct TFind=[upperFirst,tableName]PageResponse {
 `;
 
     let thrfitServiceTemplate = 
-`file:=[tableName]_service.thrift
+`file:=[singular,tableNameOrigin]_service.thrift
 namespace java com.ipolymer.soa.productdb.service
 include "=[tableName]_domain.thrift"
 
@@ -129,17 +129,17 @@ class =[upperFirst,tableName]ServiceImpl extends =[upperFirst,tableName]Service 
     let dbTemplate = 
 `file:=[datasouce].scala
 def findAll=[upperFirstAndPlural,tableName](): List[=[upperFirst,tableName]] = {
-  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM =[plural,tableName]")
+  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM =[tableNameOrigin]")
 }
 
 def find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Option[=[upperFirst,tableName]] = {
-  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[plural,tableName] where =[underScore,primaryKeyName] = \${=[primaryKeyName]}")
+  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[tableNameOrigin] where =[primaryKeyNameOrigin] = \${=[primaryKeyName]}")
 }
 
 =[FOR,rows]
 =[IFM,isUniqueKey]
 def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): Option[=[upperFirst,tableName]] = {
-  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[plural,tableName] where =[underScore,fieldName] = \${=[fieldName]}")
+  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[tableNameOrigin] where =[fieldNameOrigin] = \${=[fieldName]}")
 }
 
 =[IFMEND]
@@ -175,10 +175,10 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
   private def insert=[upperFirst,tableName](request: TCreate=[upperFirst,tableName]Request): Unit = {
     val insertSql =
       sql"""
-        INSERT INTO =[plural,tableName] SET
+        INSERT INTO =[tableNameOrigin] SET
 =[FOR,rows]
 =[IFM,isCommonField]
-          =[underScore,fieldName] = \${request.=[fieldName]},
+          =[fieldNameOrigin] = \${request.=[fieldName]},
 =[IFMEND]
 =[FOREND]
           created_by = \${BaseHelper.operatorId},
@@ -229,10 +229,10 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
 
   private def update=[upperFirst,tableName](request: TUpdate=[upperFirst,tableName]Request): Unit = {
     val updateSql =
-      sql" UPDATE =[plural,tableName] SET " +
+      sql" UPDATE =[tableNameOrigin] SET " +
 =[FOR,rows]
 =[IFM,isCommonField]
-        request.=[fieldName].isDefined.optional(sql"=[underScore,fieldName] = \${request.=[fieldName].get},") +
+        request.=[fieldName].isDefined.optional(sql"=[fieldNameOrigin] = \${request.=[fieldName].get},") +
 =[IFMEND]
 =[FOREND]
         sql" updated_by = \${BaseHelper.operatorId} WHERE =[primaryKeyName] = \${request.=[primaryKeyName]} "
@@ -261,7 +261,7 @@ class Delete=[upperFirst,tableName]ByIdAction(=[primaryKeyName]: =[dataTypeToSca
   }
 
   override def action: Unit = {
-    datasouce.esql(sql"DELETE FROM =[plural,tableName] WHERE =[underScore,primaryKeyName] = \${=[primaryKeyName]}")
+    datasouce.esql(sql"DELETE FROM =[tableNameOrigin] WHERE =[primaryKeyNameOrigin] = \${=[primaryKeyName]}")
   }
 }
 `;
@@ -340,7 +340,7 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
   override def preCheck: Unit = {}
 
   override def action: TFind=[upperFirst,tableName]PageResponse = {
-    val countSql = sql"SELECT count(*) FROM =[plural,tableName] "
+    val countSql = sql"SELECT count(*) FROM =[tableNameOrigin] "
     val count = datasouce.getCount(countSql + whereSql)
     val rows = if (count > 0) getRows else List.empty[T=[upperFirst,tableName]]
 
@@ -353,12 +353,12 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
   private lazy val whereSql = sql" WHERE 1=1 " +
 =[FOR,rows]
 =[IFM,isCommonField]
-    request.=[fieldName].isDefined.optional(sql" AND =[underScore,fieldName] = \${request.=[fieldName].get} ") =[SEP,addSeparatorPlusForCF]
+    request.=[fieldName].isDefined.optional(sql" AND =[fieldNameOrigin] = \${request.=[fieldName].get} ") =[SEP,addSeparatorPlusForCF]
 =[IFMEND]
 =[FOREND]
 
   private def getRows: List[T=[upperFirst,tableName]] = {
-    val selectSql = sql"SELECT * FROM =[plural,tableName] "
+    val selectSql = sql"SELECT * FROM =[tableNameOrigin] "
     val orderBySql = sql" ORDER BY \${request.pageRequest.sortFields.getOrElse("updated_at")} DESC "
     val limitSql = sql" limit \${request.pageRequest.start}, \${request.pageRequest.limit} "
     datasouce.rows[=[upperFirst,tableName]](selectSql + whereSql + orderBySql + limitSql).map(it => BeanBuilder.build[T=[upperFirst,tableName]](it)())

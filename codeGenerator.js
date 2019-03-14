@@ -2,7 +2,8 @@
 function parseSql(sql) {
     function createRow() {
         return {
-            fieldName: "",
+            fieldName: "", // 把下划线转为驼峰后的字段名
+            fieldNameOrigin: "", // 未经过处理的字段名
             dataType: "", // string, int, timestamp, double
             isOptional: false,
             fieldComment: "",
@@ -13,10 +14,12 @@ function parseSql(sql) {
     }
     let rows = []
     let obj = {
-        tableName: "",
+        tableName: "", // 把下划线转为驼峰，复数转为单数后的字段名
+        tableNameOrigin: "", // 未经过处理的表名
         tableComment: "",
         rows,
-        primaryKeyName: "",
+        primaryKeyName: "", // 主键名
+        primaryKeyNameOrigin: "", // 未经过处理的主键名
         primaryKeyDataType: ""
     }
     let execArray = null
@@ -27,6 +30,7 @@ function parseSql(sql) {
         if (execArray = /^CREATE TABLE `(\w+)`/i.exec(line)) {
             // 匹配表名
             obj.tableName = singular(camelize(execArray[1]))
+            obj.tableNameOrigin = execArray[1]
         } else if (execArray = /COMMENT=\'(.+)\';$/.exec(line)) {
             // 匹配表备注
             obj.tableComment = execArray[1]
@@ -34,6 +38,7 @@ function parseSql(sql) {
             // 匹配表字段
             let row = createRow()
             row.fieldName = camelize(execArray[1])
+            row.fieldNameOrigin = execArray[1]
 
             if (/\svarchar\(\d+\)/.test(line) || /\schar\(\d+\)/.test(line)) {
                 row.dataType = "string"
@@ -61,6 +66,7 @@ function parseSql(sql) {
                 row.isPrimaryKey = true
                 row.isCommonField = false // 把主键移出通用字段
                 obj.primaryKeyName = row.fieldName
+                obj.primaryKeyNameOrigin = row.fieldNameOrigin
                 obj.primaryKeyDataType = row.dataType
             }
         } else if (execArray = /^\s*UNIQUE KEY[`\w\s]* \(`(\w+)`\)/.exec(line)) {
