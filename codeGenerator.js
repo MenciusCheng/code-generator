@@ -117,17 +117,37 @@ function parseThrift(text) {
 // 通过模板格式来渲染对象
 function transform(textArr, obj, templateArr) {
     for (let i = 0; i < templateArr.length; i++) {
-        const templateLine = templateArr[i];
+        const templateLine = templateArr[i]
         let execArray = null
-        if (execArray = /^\s*=\[IFM,(\w+)\]\s*/.exec(templateLine)) {
+        if (execArray = /^\s*=\[IFM,(!)?(\w+)\]\s*/.exec(templateLine)) {
+            console.log("IFM " + execArray[1] + obj[execArray[2]])
             // 多行 If
-            let tempArr = [];
-            i += 1;
-            while (!/^\s*=\[IFMEND\]\s*/.test(templateArr[i])) {
-                tempArr.push(templateArr[i]);
-                i += 1;
+            let tempArr = []
+            let ifmCount = 1 // 条件语句计数器
+            i += 1 // 读取下一行
+            while (ifmCount > 0) {
+                const tempLine = templateArr[i]
+                console.log("ForWhile: " + tempLine)
+                if (/^\s*=\[IFM,(!)?(\w+)\]\s*/.test(tempLine)) {
+                    ifmCount += 1
+                } else if (/^\s*=\[IFMEND\]\s*/.test(tempLine)) {
+                    ifmCount -= 1
+                }
+
+                if (ifmCount > 0) {
+                    tempArr.push(tempLine)
+                    i +=1
+                }
             }
-            if (obj[execArray[1]]) {
+
+            // while (!/^\s*=\[IFMEND\]\s*/.test(templateArr[i])) {
+            //     tempArr.push(templateArr[i]);
+            //     i += 1;
+            // }
+
+            let negation = !!execArray[1] // 有 ！则为 true， 没有 ! 则为 false
+            let condition = !!obj[execArray[2]]
+            if (negation !== condition) {
                 transform(textArr, obj, tempArr)
             }
         } else if (execArray = /^\s*=\[FOR,(\w+)\]\s*/.exec(templateLine)) {
@@ -146,7 +166,7 @@ function transform(textArr, obj, templateArr) {
         } else {
             let el =
                 templateLine
-                    .replace(/=\[IF,(\w+)\](.+?)\[IFEND\]/g, (_, field, str) => obj[field] ? str : '')
+                    .replace(/=\[IF,(!)?(\w+)\](.+?)\[IFEND\]/g, (_, negation, field, str) => !!negation !== !!obj[field] ? str : '')
                     .replace(/=\[SEP,(\w+)\]/g, (_, fn) => window.supportInterMethod[fn] ? window.supportInterMethod[fn](obj) : '')
                     .replace(/=\[(\w+)\]/g, (_, field) => obj[field])
                     .replace(/=\[(\w+),(\w+)\]/g, (_, fn, field) => window.supportMethod[fn] ? window.supportMethod[fn](obj[field]) : '')
