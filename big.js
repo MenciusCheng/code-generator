@@ -70,6 +70,7 @@
     })
 
     $('#templateTextArea').val(window.supportTemplate["bigTemplate"])
+    
     let initSql = "@=[soaName,productdb]\n@=[datasouce,ProductDB]\n"
     $('#sqlTextArea').val(initSql)
 })();
