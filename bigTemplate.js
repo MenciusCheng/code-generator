@@ -252,7 +252,7 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
         request.=[fieldName].isDefined.optional(sql" =[fieldNameOrigin] = \${request.=[fieldName].get}, ") +
 =[IFMEND]
 =[FOREND]
-        sql" updated_by = \${BaseHelper.operatorId} WHERE =[primaryKeyName] = \${request.=[primaryKeyName]} "
+        sql" updated_by = \${BaseHelper.operatorId} WHERE =[primaryKeyNameOrigin] = \${request.=[primaryKeyName]} "
     datasouce.esql(updateSql)
   }
 }
