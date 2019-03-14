@@ -12,7 +12,8 @@
         dataTypeToThrift,
         addInt,
         minusInt,
-        strReTail
+        strReTail,
+        scalaKey
     }
     // 模板支持的内置方法
     window.supportInterMethod = {

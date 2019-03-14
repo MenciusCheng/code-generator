@@ -12,7 +12,8 @@
         dataTypeToThrift,
         addInt,
         minusInt,
-        strReTail
+        strReTail,
+        scalaKey
     }
     // 模板支持的内置方法
     window.supportInterMethod = {
@@ -70,7 +71,7 @@
     })
 
     $('#templateTextArea').val(window.supportTemplate["bigTemplate"])
-    
+
     let initSql = "@=[soaName,productdb]\n@=[datasouce,ProductDB]\n"
     $('#sqlTextArea').val(initSql)
 })();

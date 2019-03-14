@@ -275,3 +275,9 @@ function minusInt(a, b) {
 function strReTail(str) {
     return str ? str.slice(0, str.length - 1) : ''
 }
+
+// 给 Scala 关键字加 ``
+function scalaKey(str) {
+    let scalaKeys = ["type"]
+    return scalaKeys.some(k => k == str) ? "`" + str + "`" : str
+}

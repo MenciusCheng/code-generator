@@ -32,12 +32,14 @@ struct TCreate=[upperFirst,tableName]Request {
 
 struct TUpdate=[upperFirst,tableName]Request {
     1: =[dataTypeToThrift,primaryKeyDataType] =[primaryKeyName]
-=[FOR,commonFields]
+=[FOR,rows]
+=[IFM,isCommonField]
 =[IFM,!isPrimaryKey]
     /**
     * =[fieldComment]
     **/
     =[forIndex]: optional =[dataTypeToThrift,dataType] =[fieldName]
+=[IFMEND]
 =[IFMEND]
 =[FOREND]
 }
@@ -104,7 +106,7 @@ import com.isuwang.scala_commons.sql.ResultSetMapper
 case class =[upperFirst,tableName] (
 =[FOR,rows]
 /** =[fieldComment] */
-=[fieldName]: =[IF,isOptional]Option[[IFEND]=[dataTypeToScala,dataType]=[IF,isOptional]][IFEND]=[SEP,addSeparatorComma]
+=[scalaKey,fieldName]: =[IF,isOptional]Option[[IFEND]=[dataTypeToScala,dataType]=[IF,isOptional]][IFEND]=[SEP,addSeparatorComma]
 =[FOREND]
 )
 
@@ -140,17 +142,17 @@ class =[upperFirst,tableName]ServiceImpl extends =[upperFirst,tableName]Service 
     let dbTemplate = 
 `file:=[datasouce].scala
 def findAll=[upperFirstAndPlural,tableName](): List[=[upperFirst,tableName]] = {
-  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM =[tableNameOrigin]")
+  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\`")
 }
 
 def find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Option[=[upperFirst,tableName]] = {
-  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[tableNameOrigin] WHERE =[primaryKeyNameOrigin] = \${=[primaryKeyName]}")
+  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
 }
 
 =[FOR,commonFields]
 =[IFM,isUniqueKey]
 def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): Option[=[upperFirst,tableName]] = {
-  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM =[tableNameOrigin] WHERE =[fieldNameOrigin] = \${=[fieldName]}")
+  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[fieldNameOrigin]\` = \${=[scalaKey,fieldName]}")
 }
 
 =[IFMEND]
@@ -194,12 +196,12 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
   private def insert=[upperFirst,tableName](request: TCreate=[upperFirst,tableName]Request): Unit = {
     val insertSql =
       sql"""
-        INSERT INTO =[tableNameOrigin] SET
+        INSERT INTO \`=[tableNameOrigin]\` SET
 =[FOR,commonFields]
-          =[fieldNameOrigin] = \${request.=[fieldName]},
+          \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName]},
 =[FOREND]
-          created_by = \${BaseHelper.operatorId},
-          updated_by = \${BaseHelper.operatorId}
+          \`created_by\` = \${BaseHelper.operatorId},
+          \`updated_by\` = \${BaseHelper.operatorId}
       """
     datasouce.esql(insertSql)
   }
@@ -246,13 +248,13 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
 
   private def update=[upperFirst,tableName](request: TUpdate=[upperFirst,tableName]Request): Unit = {
     val updateSql =
-      sql" UPDATE =[tableNameOrigin] SET " +
+      sql" UPDATE \`=[tableNameOrigin]\` SET " +
 =[FOR,commonFields]
 =[IFM,!isPrimaryKey]
-        request.=[fieldName].isDefined.optional(sql" =[fieldNameOrigin] = \${request.=[fieldName].get}, ") +
+        request.=[scalaKey,fieldName].isDefined.optional(sql" \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get}, ") +
 =[IFMEND]
 =[FOREND]
-        sql" updated_by = \${BaseHelper.operatorId} WHERE =[primaryKeyNameOrigin] = \${request.=[primaryKeyName]} "
+        sql" \`updated_by\` = \${BaseHelper.operatorId} WHERE \`=[primaryKeyNameOrigin]\` = \${request.=[primaryKeyName]} "
     datasouce.esql(updateSql)
   }
 }
@@ -282,7 +284,7 @@ class Delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primar
   }
 
   override def action: Unit = {
-    datasouce.esql(sql"DELETE FROM =[tableNameOrigin] WHERE =[primaryKeyNameOrigin] = \${=[primaryKeyName]}")
+    datasouce.esql(sql"DELETE FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
   }
 }
 `;
@@ -361,7 +363,7 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
   override def preCheck: Unit = {}
 
   override def action: TFind=[upperFirst,tableName]PageResponse = {
-    val countSql = sql"SELECT count(*) FROM =[tableNameOrigin] "
+    val countSql = sql"SELECT count(*) FROM \`=[tableNameOrigin]\` "
     val count = datasouce.getCount(countSql + whereSql)
     val rows = if (count > 0) getRows else List.empty[T=[upperFirst,tableName]]
 
@@ -373,11 +375,11 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
 
   private lazy val whereSql = sql" WHERE 1=1 " +
 =[FOR,commonFields]
-    request.=[fieldName].isDefined.optional(sql" AND =[fieldNameOrigin] = \${request.=[fieldName].get} ") =[SEP,addSeparatorPlus]
+    request.=[scalaKey,fieldName].isDefined.optional(sql" AND \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get} ") =[SEP,addSeparatorPlus]
 =[FOREND]
 
   private def getRows: List[T=[upperFirst,tableName]] = {
-    val selectSql = sql"SELECT * FROM =[tableNameOrigin] "
+    val selectSql = sql"SELECT * FROM \`=[tableNameOrigin]\` "
     val orderBySql = sql" ORDER BY \${request.pageRequest.sortFields.getOrElse("updated_at")} DESC "
     val limitSql = sql" LIMIT \${request.pageRequest.start}, \${request.pageRequest.limit} "
     datasouce.rows[=[upperFirst,tableName]](selectSql + whereSql + orderBySql + limitSql).map(it => BeanBuilder.build[T=[upperFirst,tableName]](it)())

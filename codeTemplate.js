@@ -24,7 +24,7 @@ import com.isuwang.scala_commons.sql.ResultSetMapper
 case class =[upperFirst,tableName] (
 =[FOR,rows]
 /** =[fieldComment] */
-=[fieldName]: =[IF,isOptional]Option[[IFEND]=[dataTypeToScala,dataType]=[IF,isOptional]][IFEND]=[SEP,addSeparatorComma]
+=[scalaKey,fieldName]: =[IF,isOptional]Option[[IFEND]=[dataTypeToScala,dataType]=[IF,isOptional]][IFEND]=[SEP,addSeparatorComma]
 =[FOREND]
 )
 
