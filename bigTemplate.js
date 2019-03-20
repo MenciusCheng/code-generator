@@ -4,7 +4,7 @@
 
     let thriftDomainTemplate = 
 `file:=[singular,tableNameOrigin]_domain.thrift
-namespace java com.ipolymer.soa.productdb.domain
+namespace java com.ipolymer.soa.=[soaName].domain
 include "base_model.thrift"
 
 /**
@@ -62,7 +62,7 @@ struct TFind=[upperFirst,tableName]PageResponse {
 
     let thrfitServiceTemplate = 
 `file:=[singular,tableNameOrigin]_service.thrift
-namespace java com.ipolymer.soa.productdb.service
+namespace java com.ipolymer.soa.=[soaName].service
 include "=[singular,tableNameOrigin]_domain.thrift"
 
 /**
