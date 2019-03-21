@@ -149,6 +149,10 @@ def find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]:
   datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
 }
 
+def exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Boolean = {
+  datasouce.queryInt(sql" SELECT COUNT(*) FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}") > 0
+}
+
 =[FOR,commonFields]
 =[IFM,isUniqueKey]
 def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): Option[=[upperFirst,tableName]] = {
@@ -276,11 +280,10 @@ import com.isuwang.scala_commons.sql._
   * 删除=[strReTail,tableComment]
   */
 class Delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]) extends Action[Unit] {
-  private lazy val =[tableName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
 
   override def preCheck: Unit = {
     assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] 不能为空")
-    assert(=[tableName]Opt.isDefined, "=[strReTail,tableComment]不存在")
+    assert(=[datasouce].exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]), "=[strReTail,tableComment]不存在")
   }
 
   override def action: Unit = {
