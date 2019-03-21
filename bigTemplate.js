@@ -390,6 +390,12 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
 }
 `;
 
+let serviceXmlTemplate = 
+`file:services.xml
+    <bean id="=[tableName]Service" class="com.ipolymer.soa.=[soaName].scala.service.=[upperFirst,tableName]ServiceImpl"/>
+    <soa:service ref="=[tableName]Service"/>
+`;
+
     let bigTemplate = thriftDomainTemplate + 
         thrfitServiceTemplate + 
         caseClassTemplate + 
@@ -414,6 +420,7 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
         findByKeyActionTemplate,
         findAllActionTemplate,
         findPageActionTemplate,
+        serviceXmlTemplate,
         bigTemplate
     };
 })();

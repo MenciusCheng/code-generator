@@ -24,7 +24,8 @@
     // 支持的内置解析器
     window.supportParser = {
         parseSql,
-        parseThrift
+        parseThrift,
+        parseSqlList
     }
 
     $('#parseSqlButton').bind("click", function (event) {
@@ -35,7 +36,15 @@
 
         let textArr = [];
         let templateArr = $('#templateTextArea').val().split("\n");
-        transform(textArr, obj, templateArr);
+
+        if (Array.isArray(obj)) {
+            obj.forEach(o => {
+                transform(textArr, o, templateArr)
+            })
+        } else {
+            transform(textArr, obj, templateArr)
+        }
+        
         $('#resultTextArea').val(textArr.join("\n"));
     })
 

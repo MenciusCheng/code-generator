@@ -17,11 +17,12 @@
         <div class="col">
             <div>待解析文本</div>
             <div>
-                <textarea name="sqlTextArea" id="sqlTextArea" cols="60" rows="30" wrap="off"></textarea>
+                <textarea name="sqlTextArea" id="sqlTextArea" cols="90" rows="30" wrap="off"></textarea>
             </div>
             <div>
                 <label for="parserSelect">解析器:</label>
                 <select id="parserSelect">
+                    <option value="parseSqlList">sql列表</option>
                     <option value="parseSql">sql</option>
                     <option value="parseThrift">thrift</option>
                 </select>
@@ -31,13 +32,15 @@
         <div class="col">
             <div>渲染模板</div>
             <div>
-                <textarea name="templateTextArea" id="templateTextArea" cols="60" rows="30" wrap="off"></textarea>
+                <textarea name="templateTextArea" id="templateTextArea" cols="90" rows="30" wrap="off"></textarea>
             </div>
             <div>
                 <label for="templateSelect">模板:</label>
                 <select id="templateSelect">
                     <option value="thriftTemplate">thrift</option>
                     <option value="caseClassTemplate">case class</option>
+                    <option value="dbTemplate">dbTemplate</option>
+                    <option value="serviceXmlTemplate">serviceXmlTemplate</option>
                     <option value="metaUITemplate">metaUI</option>
                     <option value="blankTemplate">自定义</option>
                     <!-- <option value="自定义一号">自定义一号(保存在cookie中)</option>
@@ -48,7 +51,7 @@
         <div class="col">
             <div>结果</div>
             <div>
-                <textarea name="resultTextArea" id="resultTextArea" cols="60" rows="30" wrap="off"></textarea>
+                <textarea name="resultTextArea" id="resultTextArea" cols="90" rows="30" wrap="off"></textarea>
             </div>
             <div>
                 <button id="copyResultButton" data-clipboard-target="#resultTextArea">复制</button>

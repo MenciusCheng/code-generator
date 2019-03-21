@@ -41,11 +41,40 @@ VALUES
 ;
 `;
 
+    let dbTemplate = 
+`def findAll=[upperFirstAndPlural,tableName](): List[=[upperFirst,tableName]] = {
+  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\`")
+}
+
+def find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Option[=[upperFirst,tableName]] = {
+  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
+}
+
+def exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Boolean = {
+  datasouce.queryInt(sql" SELECT COUNT(*) FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}") > 0
+}
+
+=[FOR,commonFields]
+=[IFM,isUniqueKey]
+def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): Option[=[upperFirst,tableName]] = {
+  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[fieldNameOrigin]\` = \${=[scalaKey,fieldName]}")
+}
+
+=[IFMEND]
+=[FOREND]`;
+
+    let serviceXmlTemplate = 
+`    <bean id="=[tableName]Service" class="com.ipolymer.soa.productdb.scala.service.=[upperFirst,tableName]ServiceImpl"/>
+    <soa:service ref="=[tableName]Service"/>
+`;
+
     let blankTemplate = "";
 
     window.supportTemplate = {
         thriftTemplate,
         caseClassTemplate,
+        dbTemplate,
+        serviceXmlTemplate,
         metaUITemplate,
         blankTemplate
     };

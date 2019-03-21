@@ -1,28 +1,33 @@
-// 解析创建表 SQL 为一个对象
-function parseSql(sql) {
-    function createRow() {
-        return {
-            fieldName: "", // 把下划线转为驼峰后的字段名
-            fieldNameOrigin: "", // 未经过处理的字段名
-            dataType: "", // string, int, timestamp, double
-            isOptional: false,
-            fieldComment: "",
-            isPrimaryKey: false, // 是否主键
-            isUniqueKey: false, // 是否唯一键
-            isCommonField: false, // 通用字段，除了主键和创建修改信息字段
-            isAutoIncrement: false // 是否自增
-        }
+function createSqlRow() {
+    return {
+        fieldName: "", // 把下划线转为驼峰后的字段名
+        fieldNameOrigin: "", // 未经过处理的字段名
+        dataType: "", // string, int, timestamp, double
+        isOptional: false,
+        fieldComment: "",
+        isPrimaryKey: false, // 是否主键
+        isUniqueKey: false, // 是否唯一键
+        isCommonField: false, // 通用字段，除了主键和创建修改信息字段
+        isAutoIncrement: false // 是否自增
     }
-    let rows = []
-    let obj = {
+}
+
+function createSqlObj() {
+    return {
         tableName: "", // 把下划线转为驼峰，复数转为单数后的字段名
         tableNameOrigin: "", // 未经过处理的表名
         tableComment: "",
-        rows,
+        rows: [],
         primaryKeyName: "", // 主键名
         primaryKeyNameOrigin: "", // 未经过处理的主键名
         primaryKeyDataType: ""
     }
+}
+
+// 解析创建表 SQL 为一个对象
+function parseSql(sql) {
+    let obj = createSqlObj()
+    let rows = []
     let execArray = null
     let uncommonFieldList = ["id","createdAt","createdBy","updatedAt","updatedBy"]
 
@@ -37,7 +42,7 @@ function parseSql(sql) {
             obj.tableComment = execArray[1]
         } else if (execArray = /^\s*`(\w+)`/.exec(line)) {
             // 匹配表字段
-            let row = createRow()
+            let row = createSqlRow()
             row.fieldName = camelize(execArray[1])
             row.fieldNameOrigin = execArray[1]
 
@@ -82,7 +87,8 @@ function parseSql(sql) {
         }
     })
 
-    obj.commonFields = obj.rows.filter(r => uncommonFieldList.every(u => u !== r.fieldName))
+    obj.rows = rows
+    obj.commonFields = rows.filter(r => uncommonFieldList.every(u => u !== r.fieldName))
 
     return obj
 }
@@ -116,6 +122,87 @@ function parseThrift(text) {
     })
 
     return obj
+}
+
+// 解析创建表 SQL 为一个对象
+function parseSqlList(sql) {
+    let result = []
+    let obj = createSqlObj()
+    let diy = {}
+    let rows = []
+    let execArray = null
+    let uncommonFieldList = ["id","createdAt","createdBy","updatedAt","updatedBy"]
+
+    sql.split("\n").forEach(line => {
+
+        if (execArray = /^CREATE TABLE `(\w+)`/i.exec(line)) {
+            if (obj.tableName) {
+                obj.rows = rows
+                obj.commonFields = rows.filter(r => uncommonFieldList.every(u => u !== r.fieldName))
+                result.push(obj)
+                obj = createSqlObj()
+            }
+            
+            // 匹配表名
+            obj.tableName = singular(camelize(execArray[1]))
+            obj.tableNameOrigin = execArray[1]
+        } else if (execArray = /COMMENT=\'(.+)\';$/.exec(line)) {
+            // 匹配表备注
+            obj.tableComment = execArray[1]
+        } else if (execArray = /^\s*`(\w+)`/.exec(line)) {
+            // 匹配表字段
+            let row = createSqlRow()
+            row.fieldName = camelize(execArray[1])
+            row.fieldNameOrigin = execArray[1]
+
+            if (/\svarchar\(\d+\)/.test(line) || /\schar\(\d+\)/.test(line)) {
+                row.dataType = "string"
+            } else if (/\sint\(\d+\)/.test(line) || /\ssmallint\(\d+\)/.test(line) || /\stinyint\(\d+\)/.test(line)) {
+                row.dataType = "int"
+            } else if (/\stimestamp/.test(line) || /\sdatetime/.test(line)) {
+                row.dataType = "timestamp"
+            } else if (/\sdecimal\(\d+,\d+\)/.test(line)) {
+                row.dataType = "double"
+            }
+
+            row.isOptional = line.indexOf(" NOT NULL") === -1
+
+            let matchComment = /COMMENT \'(.+)\'/i.exec(line)
+            row.fieldComment = matchComment ? matchComment[1] : ''
+
+            row.isCommonField = !uncommonFieldList.some(e => e === row.fieldName)
+
+            row.isAutoIncrement = line.indexOf(" AUTO_INCREMENT") > -1
+
+            rows.push(row)
+        } else if (execArray = /^\s*PRIMARY KEY \(`(\w+)`\)/.exec(line)) {
+            // 匹配主键
+            let fieldName = camelize(execArray[1])
+            let row = rows.find(r => r.fieldName === fieldName)
+            if (row) { 
+                row.isPrimaryKey = true
+                obj.primaryKeyName = row.fieldName
+                obj.primaryKeyNameOrigin = row.fieldNameOrigin
+                obj.primaryKeyDataType = row.dataType
+            }
+        } else if (execArray = /^\s*UNIQUE KEY[`\w\s]* \(`(\w+)`\)/.exec(line)) {
+            // 匹配唯一索引
+            let fieldName = camelize(execArray[1])
+            let row = rows.find(r => r.fieldName === fieldName)
+            if (row) { row.isUniqueKey = true }
+        } else if (execArray = /^@=\[(\w+),(.+)\]$/.exec(line)) {
+            // 匹配自定义变量
+            diy[execArray[1]] = execArray[2]
+        }
+    })
+
+    obj.rows = rows
+    obj.commonFields = rows.filter(r => uncommonFieldList.every(u => u !== r.fieldName))
+    result.push(obj)
+
+    return result.map(r => {
+        return Object.assign(r, diy)
+    })
 }
 
 // 通过模板格式来渲染对象
