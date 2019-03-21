@@ -74,6 +74,22 @@
 
     let initSql = "@=[soaName,productdb]\n@=[datasouce,ProductDB]\n"
     $('#sqlTextArea').val(initSql)
+
+    // 自定义模板
+    let bigDiyArray = ['big-diy1', 'big-diy2', 'big-diy3']
+    $('#templateTextArea').bind("change", function (event) {
+        let selectValue = $('#templateSelect').val()
+        if (bigDiyArray.some(a => a == selectValue)) {
+            console.log(new Date() + ": 自定义模板 " + selectValue + " 自动保存成功！")
+            localStorage.setItem(selectValue, event.target.value)
+            window.supportTemplate[selectValue] = event.target.value
+        }
+    })
+    bigDiyArray.forEach(a => {
+        if (localStorage.getItem(a)) {
+            window.supportTemplate[a] = localStorage.getItem(a)
+        }
+    })
 })();
 
 
