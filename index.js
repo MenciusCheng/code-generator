@@ -13,7 +13,8 @@
         addInt,
         minusInt,
         strReTail,
-        scalaKey
+        scalaKey,
+        dataTypeToScalaV1
     }
     // 模板支持的内置方法
     window.supportInterMethod = {

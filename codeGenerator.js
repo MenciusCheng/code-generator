@@ -33,7 +33,7 @@ function parseSql(sql) {
 
     sql.split("\n").forEach(line => {
 
-        if (execArray = /^CREATE TABLE `(\w+)`/i.exec(line)) {
+        if (execArray = /^CREATE TABLE (?:`\w+`\.)?`(\w+)`/i.exec(line)) {
             // 匹配表名
             obj.tableName = singular(camelize(execArray[1]))
             obj.tableNameOrigin = execArray[1]
@@ -135,7 +135,7 @@ function parseSqlList(sql) {
 
     sql.split("\n").forEach(line => {
 
-        if (execArray = /^CREATE TABLE `(\w+)`/i.exec(line)) {
+        if (execArray = /^CREATE TABLE (?:`\w+`\.)?`(\w+)`/i.exec(line)) {
             if (obj.tableName) {
                 obj.rows = rows
                 obj.commonFields = rows.filter(r => uncommonFieldList.every(u => u !== r.fieldName))
@@ -331,6 +331,20 @@ function upperFirstAndPlural(str) {
 function dataTypeToScala(str) {
     let types = ['string','int','timestamp','double']
     let scalaTypes = ['String','Int','LocalDateTime','BigDecimal']
+    for (let i = 0; i < types.length; i++) {
+        if (types[i] == str) {
+            return scalaTypes[i]
+        }
+    }
+    return ''
+}
+
+// 把数据类型转换为Scala的类型，旧的domain转换
+// 数据类型: string, int, timestamp, double
+// Scala的类型: String, Int, LocalDateTime, BigDecimal
+function dataTypeToScalaV1(str) {
+    let types = ['string','int','timestamp','double']
+    let scalaTypes = ['String','Int','java.sql.Timestamp','BigDecimal']
     for (let i = 0; i < types.length; i++) {
         if (types[i] == str) {
             return scalaTypes[i]

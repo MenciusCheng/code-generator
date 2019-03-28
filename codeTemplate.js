@@ -68,6 +68,20 @@ def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): 
     <soa:service ref="=[tableName]Service"/>
 `;
 
+    let domainTableTemplate =
+`import wangzx.scala_commons.sql.Table
+
+@Table(value = "=[tableNameOrigin]", camelToUnderscore = true)
+class =[upperFirst,tableName] extends java.io.Serializable {
+=[FOR,rows]
+=[IFM,fieldComment]
+  /** =[fieldComment] */
+=[IFMEND]
+  var =[scalaKey,fieldName]: =[dataTypeToScalaV1,dataType] = _
+=[FOREND]
+}
+`;
+
     let blankTemplate = "";
 
     window.supportTemplate = {
@@ -76,7 +90,8 @@ def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): 
         dbTemplate,
         serviceXmlTemplate,
         metaUITemplate,
-        blankTemplate
+        blankTemplate,
+        domainTableTemplate
     };
 })();
 
