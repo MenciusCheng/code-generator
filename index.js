@@ -25,7 +25,8 @@
     window.supportParser = {
         parseSql,
         parseThrift,
-        parseSqlList
+        parseSqlList,
+        parseNumber
     }
 
     $('#parseSqlButton').bind("click", function (event) {

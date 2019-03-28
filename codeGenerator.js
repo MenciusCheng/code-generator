@@ -205,6 +205,25 @@ function parseSqlList(sql) {
     })
 }
 
+// 解析地址编码
+function parseNumber(text) {
+    let obj = {}
+    let rows = []
+    let execArray = null
+    text.split("\n").forEach(line => {
+        if (execArray = /(\d+)\t(\d+)\t(\d+)/.exec(line)) {
+            let row = {
+                a: execArray[1],
+                b: execArray[2],
+                c: execArray[3]
+            }
+            rows.push(row)
+        }
+    })
+    obj.rows = rows
+    return obj
+}
+
 // 通过模板格式来渲染对象
 function transform(textArr, obj, templateArr) {
     for (let i = 0; i < templateArr.length; i++) {
