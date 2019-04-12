@@ -103,7 +103,8 @@ package com.ipolymer.soa.=[soaName].scala.domain
 import java.time.LocalDateTime
 import com.isuwang.scala_commons.sql.ResultSetMapper
 
-case class =[upperFirst,tableName] (
+case class =[upperFirst,tableName] 
+(
 =[FOR,rows]
 /** =[fieldComment] */
 =[scalaKey,fieldName]: =[IF,isOptional]Option[[IFEND]=[dataTypeToScala,dataType]=[IF,isOptional]][IFEND]=[SEP,addSeparatorComma]
@@ -383,7 +384,7 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
 
   private def getRows: List[T=[upperFirst,tableName]] = {
     val selectSql = sql"SELECT * FROM \`=[tableNameOrigin]\` "
-    val orderBySql = sql" ORDER BY \${request.pageRequest.sortFields.getOrElse("updated_at")} DESC "
+    val orderBySql = s" ORDER BY \${request.pageRequest.sortFields.getOrElse("updated_at")} DESC "
     val limitSql = sql" LIMIT \${request.pageRequest.start}, \${request.pageRequest.limit} "
     datasouce.rows[=[upperFirst,tableName]](selectSql + whereSql + orderBySql + limitSql).map(it => BeanBuilder.build[T=[upperFirst,tableName]](it)())
   }
