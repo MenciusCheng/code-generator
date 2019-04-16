@@ -211,11 +211,10 @@ function parseNumber(text) {
     let rows = []
     let execArray = null
     text.split("\n").forEach(line => {
-        if (execArray = /(\d+)\t(\d+)\t(\d+)/.exec(line)) {
+        if (execArray = /^(\d+)\t(.+)$/.exec(line)) {
             let row = {
-                a: execArray[1],
-                b: execArray[2],
-                c: execArray[3]
+                code: execArray[1],
+                name: execArray[2]
             }
             rows.push(row)
         }
@@ -401,4 +400,8 @@ function strReTail(str) {
 function scalaKey(str) {
     let scalaKeys = ["type"]
     return scalaKeys.some(k => k == str) ? "`" + str + "`" : str
+}
+
+function left(str, length) {
+    return str.substring(0, length)
 }
