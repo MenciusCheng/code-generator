@@ -93,6 +93,10 @@ service =[upperFirst,tableName]Service {
     * 分页查询=[strReTail,tableComment]
     **/
     =[singular,tableNameOrigin]_domain.TFind=[upperFirst,tableName]PageResponse find=[upperFirst,tableName]Page(=[singular,tableNameOrigin]_domain.TFind=[upperFirst,tableName]PageRequest request)
+    /**
+    * 通过=[plural,primaryKeyName]查询=[strReTail,tableComment]列表
+    **/
+    list<=[singular,tableNameOrigin]_domain.T=[upperFirst,tableName]> find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](list<=[dataTypeToThrift,primaryKeyDataType]> =[plural,primaryKeyName])
 }
 `;
 
@@ -137,6 +141,8 @@ class =[upperFirst,tableName]ServiceImpl extends =[upperFirst,tableName]Service 
   override def findAll=[upperFirstAndPlural,tableName](): List[T=[upperFirst,tableName]] = new FindAll=[upperFirstAndPlural,tableName]Action().execute
 
   override def find=[upperFirst,tableName]Page(request: TFind=[upperFirst,tableName]PageRequest): TFind=[upperFirst,tableName]PageResponse = new Find=[upperFirst,tableName]PageAction(request).execute
+
+  override def find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]: List[=[dataTypeToScala,primaryKeyDataType]]): List[T=[upperFirst,tableName]] = new Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName]Action(=[plural,primaryKeyName]).execute
 }
 `;
 
@@ -162,6 +168,9 @@ def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): 
 
 =[IFMEND]
 =[FOREND]
+def find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]: List[=[dataTypeToScala,primaryKeyDataType]]): List[=[upperFirst,tableName]] = {
+  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` IN " + buildSqlIn(=[plural,primaryKeyName]))
+}
 `;
 
     let createActionTemplate = 
@@ -347,6 +356,32 @@ class FindAll=[upperFirstAndPlural,tableName]Action() extends Action[List[T=[upp
 }
 `;
 
+let findByKeysActionTemplate = 
+`file:Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName]Action.scala
+package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
+
+import com.ipolymer.soa.=[soaName].scala.db.=[datasouce]
+import com.ipolymer.soa.=[soaName].scala.domain.T=[upperFirst,tableName]
+import com.isuwang.commons.Action
+import com.isuwang.commons.Assert._
+import com.isuwang.scala_commons.sql._
+import com.isuwang.commons.converters.SqlImplicits._
+import com.isuwang.commons.converters.Implicits._
+
+/**
+  * 通过=[plural,primaryKeyName]查询=[strReTail,tableComment]列表
+  */
+class Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName]Action(=[plural,primaryKeyName]: List[=[dataTypeToScala,primaryKeyDataType]]) extends Action[List[T=[upperFirst,tableName]]] {
+  override def preCheck: Unit = {}
+
+  override def action: List[T=[upperFirst,tableName]] = {
+    =[datasouce].find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]).map(it => {
+      BeanBuilder.build[T=[upperFirst,tableName]](it)()
+    })
+  }
+}
+`;
+
 let findPageActionTemplate = 
 `file:Find=[upperFirst,tableName]PageAction.scala
 package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
@@ -407,6 +442,7 @@ let serviceXmlTemplate =
         deleteActionTemplate + 
         findByKeyActionTemplate + 
         findAllActionTemplate + 
+        findByKeysActionTemplate +
         findPageActionTemplate;
 
     window.supportTemplate = {
