@@ -37,7 +37,7 @@ function parseSql(sql) {
             // 匹配表名
             obj.tableName = singular(camelize(execArray[1]))
             obj.tableNameOrigin = execArray[1]
-        } else if (execArray = /COMMENT=\'(.+)\';$/.exec(line)) {
+        } else if (/^\s*\)/.test(line) && (execArray = /COMMENT=\'(.+)\';?$/.exec(line))) {
             // 匹配表备注
             obj.tableComment = execArray[1]
         } else if (execArray = /^\s*`(\w+)`/.exec(line)) {
