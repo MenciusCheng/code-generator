@@ -405,3 +405,37 @@ function scalaKey(str) {
 function left(str, length) {
     return str.substring(0, length)
 }
+
+(function () {
+    // 模板支持的普通方法
+    window.supportMethod = {
+        camelize,
+        underScore,
+        upperFirst,
+        lowerFirst,
+        plural,
+        singular,
+        upperFirstAndPlural,
+        dataTypeToScala,
+        dataTypeToThrift,
+        addInt,
+        minusInt,
+        strReTail,
+        scalaKey,
+        dataTypeToScalaV1,
+        left
+    }
+    // 模板支持的内置方法
+    window.supportInterMethod = {
+        addSeparatorComma,
+        addSeparatorPlus,
+        addSeparatorPlusForCF
+    }
+    // 支持的内置解析器
+    window.supportParser = {
+        parseSql,
+        parseThrift,
+        parseSqlList,
+        parseNumber
+    }
+})()
