@@ -12,12 +12,14 @@ include "base_model.thrift"
 **/
 struct T=[upperFirst,tableName] {
 =[FOR,rows]
+=[IFM,!isDeletedKey]
 =[IFM,fieldComment]
     /**
     * =[fieldComment]
     **/
 =[IFMEND]
     =[forIndex]:=[IF,isOptional] optional[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
+=[IFMEND]
 =[FOREND]
 }
 
@@ -26,7 +28,7 @@ struct TCreate=[upperFirst,tableName]Request {
     /**
     * =[fieldComment]
     **/
-    =[forIndex]:=[IF,isOptional] optional[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
+    =[forIndex]:=[IF,isNotNeed] optional[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
 =[FOREND]
 }
 
@@ -86,17 +88,20 @@ service =[upperFirst,tableName]Service {
     **/
     =[singular,tableNameOrigin]_domain.T=[upperFirst,tableName] find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[dataTypeToThrift,primaryKeyDataType] =[primaryKeyName])
     /**
-    * 查询所有=[strReTail,tableComment]
-    */
-    list<=[singular,tableNameOrigin]_domain.T=[upperFirst,tableName]> findAll=[upperFirstAndPlural,tableName]()
+    * 通过=[plural,primaryKeyName]查询=[strReTail,tableComment]列表
+    **/
+    list<=[singular,tableNameOrigin]_domain.T=[upperFirst,tableName]> find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](list<=[dataTypeToThrift,primaryKeyDataType]> =[plural,primaryKeyName])
     /**
     * 分页查询=[strReTail,tableComment]
     **/
     =[singular,tableNameOrigin]_domain.TFind=[upperFirst,tableName]PageResponse find=[upperFirst,tableName]Page(=[singular,tableNameOrigin]_domain.TFind=[upperFirst,tableName]PageRequest request)
+=[IFM,haveDisabledKey]
     /**
-    * 通过=[plural,primaryKeyName]查询=[strReTail,tableComment]列表
+    * 禁用=[strReTail,tableComment]
+    * @param disabled 值为 true 禁用，false 启用
     **/
-    list<=[singular,tableNameOrigin]_domain.T=[upperFirst,tableName]> find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](list<=[dataTypeToThrift,primaryKeyDataType]> =[plural,primaryKeyName])
+    void disable=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[dataTypeToThrift,primaryKeyDataType] =[primaryKeyName], bool disabled)
+=[IFMEND]
 }
 `;
 
@@ -138,8 +143,6 @@ class =[upperFirst,tableName]ServiceImpl extends =[upperFirst,tableName]Service 
 
   override def find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): T=[upperFirst,tableName] = new Find=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]).execute
 
-  override def findAll=[upperFirstAndPlural,tableName](): List[T=[upperFirst,tableName]] = new FindAll=[upperFirstAndPlural,tableName]Action().execute
-
   override def find=[upperFirst,tableName]Page(request: TFind=[upperFirst,tableName]PageRequest): TFind=[upperFirst,tableName]PageResponse = new Find=[upperFirst,tableName]PageAction(request).execute
 
   override def find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]: List[=[dataTypeToScala,primaryKeyDataType]]): List[T=[upperFirst,tableName]] = new Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName]Action(=[plural,primaryKeyName]).execute
@@ -149,28 +152,33 @@ class =[upperFirst,tableName]ServiceImpl extends =[upperFirst,tableName]Service 
     let dbTemplate = 
 `file:=[datasouce].scala
 def findAll=[upperFirstAndPlural,tableName](): List[=[upperFirst,tableName]] = {
-  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\`")
+  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0")
 }
 
 def find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Option[=[upperFirst,tableName]] = {
-  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
+  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
 }
 
 def exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Boolean = {
-  datasouce.queryInt(sql" SELECT COUNT(*) FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}") > 0
+  datasouce.queryInt(sql" SELECT COUNT(*) FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}") > 0
+}
+
+def find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]: List[=[dataTypeToScala,primaryKeyDataType]]): List[=[upperFirst,tableName]] = {
+  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` IN " + buildSqlIn(=[plural,primaryKeyName]))
 }
 
 =[FOR,commonFields]
 =[IFM,isUniqueKey]
 def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): Option[=[upperFirst,tableName]] = {
-  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[fieldNameOrigin]\` = \${=[scalaKey,fieldName]}")
+  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[fieldNameOrigin]\` = \${=[scalaKey,fieldName]}")
 }
 
 =[IFMEND]
 =[FOREND]
-def find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]: List[=[dataTypeToScala,primaryKeyDataType]]): List[=[upperFirst,tableName]] = {
-  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` IN " + buildSqlIn(=[plural,primaryKeyName]))
+def logicallyDelete=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Unit = {
+  datasouce.esql(sql"UPDATE \`=[tableNameOrigin]\` SET is_deleted = 1 WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
 }
+
 `;
 
     let createActionTemplate = 
@@ -233,6 +241,7 @@ import com.ipolymer.soa.=[soaName].scala.helper.BaseHelper
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
 import com.isuwang.commons.converters.SqlImplicits._
+import com.isuwang.commons.converters.Implicits._
 import com.isuwang.scala_commons.sql._
 
 /**
@@ -261,13 +270,13 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
       sql"""
         INSERT INTO \`=[tableNameOrigin]\` SET
 =[FOR,commonFields]
-=[IFM,!isOptional]
+=[IFM,!isNotNeed]
           \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName]},
 =[IFMEND]
 =[FOREND]
         """ +
 =[FOR,commonFields]
-=[IFM,isOptional]
+=[IFM,isNotNeed]
         request.=[scalaKey,fieldName].isDefined.optional(sql" \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get}, ") +
 =[IFMEND]
 =[FOREND]
@@ -302,13 +311,13 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
 
   override def preCheck: Unit = {
     assert(request.=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is null")
-    assert(=[tableName]Opt.isDefined, "=[strReTail,tableComment] not found")
-
+    assert(=[tableName]Opt.isDefined, "=[tableName] not found")
 =[FOR,commonFields]
 =[IFM,isUniqueKey]
+
     if (request.=[fieldName].isDefined) {
       val =[tableName]By=[upperFirst,fieldName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get)
-      assert(=[tableName]By=[upperFirst,fieldName]Opt.isEmpty || =[tableName]By=[upperFirst,fieldName]Opt.get.=[fieldName] == =[tableName]Opt.get.=[fieldName], "=[fieldComment] already exist")
+      assert(=[tableName]By=[upperFirst,fieldName]Opt.isEmpty || =[tableName]By=[upperFirst,fieldName]Opt.get.=[fieldName] == =[tableName]Opt.get.=[fieldName], "=[fieldName] already exist")
     }
 =[IFMEND]
 =[FOREND]
@@ -348,14 +357,13 @@ import com.isuwang.scala_commons.sql._
   * 删除=[strReTail,tableComment]
   */
 class Delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]) extends Action[Unit] {
-
   override def preCheck: Unit = {
-    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is empty")
-    assert(=[datasouce].exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]), "=[strReTail,tableComment] not found")
+    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is null")
+    assert(=[datasouce].exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]), "=[tableName] not found")
   }
 
   override def action: Unit = {
-    datasouce.esql(sql"DELETE FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
+    =[datasouce].logicallyDelete=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
   }
 }
 `;
@@ -378,38 +386,12 @@ class Find=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryK
   private lazy val =[tableName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
 
   override def preCheck: Unit = {
-    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is empty")
-    assert(=[tableName]Opt.isDefined, "=[strReTail,tableComment] not found")
+    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is null")
+    assert(=[tableName]Opt.isDefined, "=[tableName] not found")
   }
 
   override def action: T=[upperFirst,tableName] = {
     BeanBuilder.build[T=[upperFirst,tableName]](=[tableName]Opt.get)()
-  }
-}
-`;
-
-let findAllActionTemplate = 
-`file:FindAll=[upperFirstAndPlural,tableName]Action.scala
-package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
-
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce]
-import com.ipolymer.soa.=[soaName].scala.domain.T=[upperFirst,tableName]
-import com.isuwang.commons.Action
-import com.isuwang.commons.Assert._
-import com.isuwang.scala_commons.sql._
-import com.isuwang.commons.converters.SqlImplicits._
-import com.isuwang.commons.converters.Implicits._
-
-/**
-  * 查询所有=[strReTail,tableComment]
-  */
-class FindAll=[upperFirstAndPlural,tableName]Action() extends Action[List[T=[upperFirst,tableName]]] {
-  override def preCheck: Unit = {}
-
-  override def action: List[T=[upperFirst,tableName]] = {
-    =[datasouce].findAll=[upperFirstAndPlural,tableName]().map(it => {
-      BeanBuilder.build[T=[upperFirst,tableName]](it)()
-    })
   }
 }
 `;
@@ -470,7 +452,7 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
     )
   }
 
-  private lazy val whereSql = sql" WHERE 1=1 " +
+  private lazy val whereSql = sql" WHERE is_deleted = 0 " +
 =[FOR,commonFields]
     request.=[scalaKey,fieldName].isDefined.optional(sql" AND \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get} ") =[SEP,addSeparatorPlus]
 =[FOREND]
@@ -500,7 +482,6 @@ let serviceXmlTemplate =
         updateActionTemplate + 
         deleteActionTemplate + 
         findByKeyActionTemplate + 
-        findAllActionTemplate + 
         findByKeysActionTemplate +
         findPageActionTemplate;
 
@@ -514,7 +495,6 @@ let serviceXmlTemplate =
         updateActionTemplate,
         deleteActionTemplate,
         findByKeyActionTemplate,
-        findAllActionTemplate,
         findPageActionTemplate,
         serviceXmlTemplate,
         bigTemplate

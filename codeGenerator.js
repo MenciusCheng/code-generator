@@ -8,7 +8,10 @@ function createSqlRow() {
         isPrimaryKey: false, // 是否主键
         isUniqueKey: false, // 是否唯一键
         isCommonField: false, // 通用字段，除了主键和创建修改信息字段
-        isAutoIncrement: false // 是否自增
+        isAutoIncrement: false, // 是否自增
+        isDefault: false,
+        isNotNeed: false,
+        isDeletedKey: false
     }
 }
 
@@ -20,7 +23,8 @@ function createSqlObj() {
         rows: [],
         primaryKeyName: "", // 主键名
         primaryKeyNameOrigin: "", // 未经过处理的主键名
-        primaryKeyDataType: ""
+        primaryKeyDataType: "",
+        haveDisabledKey: false
     }
 }
 
@@ -29,7 +33,8 @@ function parseSql(sql) {
     let obj = createSqlObj()
     let rows = []
     let execArray = null
-    let uncommonFieldList = ["id","createdAt","createdBy","updatedAt","updatedBy"]
+    let uncommonFieldList = ["id","createdAt","createdBy","updatedAt","updatedBy","isDeleted"]
+    let uniqueCheckList = ["name"]
 
     sql.split("\n").forEach(line => {
 
@@ -56,7 +61,12 @@ function parseSql(sql) {
                 row.dataType = "double"
             }
 
+            // 是否不为空
             row.isOptional = line.indexOf(" NOT NULL") === -1
+            // 是否有默认值
+            row.isDefault = line.indexOf(" DEFAULT ") > -1
+            // 创建时是否必填
+            row.isNotNeed = row.isOptional || row.isDefault
 
             let matchComment = /COMMENT \'(.+)\'/i.exec(line)
             row.fieldComment = matchComment ? matchComment[1] : ''
@@ -64,6 +74,15 @@ function parseSql(sql) {
             row.isCommonField = !uncommonFieldList.some(e => e === row.fieldName)
 
             row.isAutoIncrement = line.indexOf(" AUTO_INCREMENT") > -1
+
+            if (row.fieldName == 'isDeleted') {
+                row.isDeletedKey = true
+            }
+
+            // 符合指定名称的，会做唯一检查
+            if (uniqueCheckList.some(it => it == row.fieldName)) {
+                row.isUniqueKey = true
+            }
 
             rows.push(row)
         } else if (execArray = /^\s*PRIMARY KEY \(`(\w+)`\)/.exec(line)) {
@@ -89,6 +108,7 @@ function parseSql(sql) {
 
     obj.rows = rows
     obj.commonFields = rows.filter(r => uncommonFieldList.every(u => u !== r.fieldName))
+    obj.haveDisabledKey = rows.some(r => r.fieldName == "isDisabled")
 
     return obj
 }
