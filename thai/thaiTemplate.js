@@ -194,11 +194,11 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
 =[FOR,commonFields]
 =[IFM,isPrimaryKey]
 =[IFM,!isAutoIncrement]
-    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment]已存在")
+    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment] already exist")
 =[IFMEND]
 =[IFMEND]
 =[IFM,isUniqueKey]
-    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment]已存在")
+    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment] already exist")
 =[IFMEND]
 =[FOREND]
   }
@@ -217,6 +217,64 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
           \`created_by\` = \${BaseHelper.operatorId},
           \`updated_by\` = \${BaseHelper.operatorId}
       """
+    datasouce.esql(insertSql)
+  }
+}
+`;
+
+  let createActionTemplate2 = 
+`file:Create=[upperFirst,tableName]Action.scala
+package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
+
+import com.ipolymer.soa.=[soaName].scala.db.=[datasouce]
+import com.ipolymer.soa.=[soaName].scala.db.=[datasouce].datasouce
+import com.ipolymer.soa.=[soaName].scala.domain.TCreate=[upperFirst,tableName]Request
+import com.ipolymer.soa.=[soaName].scala.helper.BaseHelper
+import com.isuwang.commons.Action
+import com.isuwang.commons.Assert._
+import com.isuwang.commons.converters.SqlImplicits._
+import com.isuwang.scala_commons.sql._
+
+/**
+  * 新增=[strReTail,tableComment]
+  */
+class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName]Request) extends Action[Unit] {
+  override def preCheck: Unit = {
+=[FOR,commonFields]
+=[IFM,isPrimaryKey]
+=[IFM,!isAutoIncrement]
+    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment] already exist")
+=[IFMEND]
+=[IFMEND]
+=[IFM,isUniqueKey]
+    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment] already exist")
+=[IFMEND]
+=[FOREND]
+  }
+
+  override def action: Unit = {
+    insert=[upperFirst,tableName](request)
+  }
+
+  private def insert=[upperFirst,tableName](request: TCreate=[upperFirst,tableName]Request): Unit = {
+    val insertSql =
+      sql"""
+        INSERT INTO \`=[tableNameOrigin]\` SET
+=[FOR,commonFields]
+=[IFM,!isOptional]
+          \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName]},
+=[IFMEND]
+=[FOREND]
+        """ +
+=[FOR,commonFields]
+=[IFM,isOptional]
+        request.=[scalaKey,fieldName].isDefined.optional(sql" \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get}, ") +
+=[IFMEND]
+=[FOREND]
+        sql"""
+          \`created_by\` = \${BaseHelper.operatorId},
+          \`updated_by\` = \${BaseHelper.operatorId}
+        """
     datasouce.esql(insertSql)
   }
 }
@@ -243,14 +301,14 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
   private lazy val =[tableName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](request.=[primaryKeyName])
 
   override def preCheck: Unit = {
-    assert(request.=[primaryKeyName].isNotEmpty, "=[primaryKeyName] 不能为空")
-    assert(=[tableName]Opt.isDefined, "=[strReTail,tableComment]不存在")
+    assert(request.=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is null")
+    assert(=[tableName]Opt.isDefined, "=[strReTail,tableComment] not found")
 
 =[FOR,commonFields]
 =[IFM,isUniqueKey]
     if (request.=[fieldName].isDefined) {
       val =[tableName]By=[upperFirst,fieldName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get)
-      assert(=[tableName]By=[upperFirst,fieldName]Opt.isEmpty || =[tableName]By=[upperFirst,fieldName]Opt.get.=[fieldName] == =[tableName]Opt.get.=[fieldName], "=[fieldComment]已存在")
+      assert(=[tableName]By=[upperFirst,fieldName]Opt.isEmpty || =[tableName]By=[upperFirst,fieldName]Opt.get.=[fieldName] == =[tableName]Opt.get.=[fieldName], "=[fieldComment] already exist")
     }
 =[IFMEND]
 =[FOREND]
@@ -292,8 +350,8 @@ import com.isuwang.scala_commons.sql._
 class Delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]) extends Action[Unit] {
 
   override def preCheck: Unit = {
-    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] 不能为空")
-    assert(=[datasouce].exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]), "=[strReTail,tableComment]不存在")
+    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is empty")
+    assert(=[datasouce].exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]), "=[strReTail,tableComment] not found")
   }
 
   override def action: Unit = {
@@ -320,8 +378,8 @@ class Find=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryK
   private lazy val =[tableName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
 
   override def preCheck: Unit = {
-    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] 不能为空")
-    assert(=[tableName]Opt.isDefined, "=[strReTail,tableComment]不存在")
+    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is empty")
+    assert(=[tableName]Opt.isDefined, "=[strReTail,tableComment] not found")
   }
 
   override def action: T=[upperFirst,tableName] = {
@@ -438,6 +496,7 @@ let serviceXmlTemplate =
         serviceImplTemplate + 
         dbTemplate + 
         createActionTemplate + 
+        createActionTemplate2 + 
         updateActionTemplate + 
         deleteActionTemplate + 
         findByKeyActionTemplate + 
