@@ -202,11 +202,11 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
 =[FOR,commonFields]
 =[IFM,isPrimaryKey]
 =[IFM,!isAutoIncrement]
-    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment] already exist")
+    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldName] already exist")
 =[IFMEND]
 =[IFMEND]
 =[IFM,isUniqueKey]
-    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment] already exist")
+    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldName] already exist")
 =[IFMEND]
 =[FOREND]
   }
@@ -252,11 +252,13 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
 =[FOR,commonFields]
 =[IFM,isPrimaryKey]
 =[IFM,!isAutoIncrement]
-    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment] already exist")
+    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldName] already exist")
 =[IFMEND]
 =[IFMEND]
 =[IFM,isUniqueKey]
-    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldComment] already exist")
+    if (request.=[fieldName].isDefined) {
+      assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get).isEmpty, "=[fieldName] already exist")
+    }
 =[IFMEND]
 =[FOREND]
   }

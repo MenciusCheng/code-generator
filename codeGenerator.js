@@ -34,7 +34,7 @@ function parseSql(sql) {
     let rows = []
     let execArray = null
     let uncommonFieldList = ["id","createdAt","createdBy","updatedAt","updatedBy","isDeleted"]
-    let uniqueCheckList = ["name"]
+    // let uniqueCheckList = ["name"]
 
     sql.split("\n").forEach(line => {
 
@@ -80,9 +80,9 @@ function parseSql(sql) {
             }
 
             // 符合指定名称的，会做唯一检查
-            if (uniqueCheckList.some(it => it == row.fieldName)) {
-                row.isUniqueKey = true
-            }
+            // if (uniqueCheckList.some(it => it == row.fieldName)) {
+            //     row.isUniqueKey = true
+            // }
 
             rows.push(row)
         } else if (execArray = /^\s*PRIMARY KEY \(`(\w+)`\)/.exec(line)) {
