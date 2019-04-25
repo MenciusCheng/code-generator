@@ -51,7 +51,7 @@ function parseSql(sql) {
             row.fieldName = camelize(execArray[1])
             row.fieldNameOrigin = execArray[1]
 
-            if (/\svarchar\(\d+\)/.test(line) || /\schar\(\d+\)/.test(line)) {
+            if (/\svarchar\(\d+\)/.test(line) || /\schar\(\d+\)/.test(line) || /\stext/.test(line)) {
                 row.dataType = "string"
             } else if (/\sint\(\d+\)/.test(line) || /\ssmallint\(\d+\)/.test(line) || /\stinyint\(\d+\)/.test(line)) {
                 row.dataType = "int"
@@ -175,7 +175,7 @@ function parseSqlList(sql) {
             row.fieldName = camelize(execArray[1])
             row.fieldNameOrigin = execArray[1]
 
-            if (/\svarchar\(\d+\)/.test(line) || /\schar\(\d+\)/.test(line)) {
+            if (/\svarchar\(\d+\)/.test(line) || /\schar\(\d+\)/.test(line) || /\stext/.test(line)) {
                 row.dataType = "string"
             } else if (/\sint\(\d+\)/.test(line) || /\ssmallint\(\d+\)/.test(line) || /\stinyint\(\d+\)/.test(line)) {
                 row.dataType = "int"
