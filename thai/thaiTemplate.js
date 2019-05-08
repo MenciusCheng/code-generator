@@ -220,7 +220,7 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
       sql"""
         INSERT INTO \`=[tableNameOrigin]\` SET
 =[FOR,commonFields]
-          \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName]},
+          \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName]=[IF,isTimestamp].toLocalDateTime[IFEND]},
 =[FOREND]
           \`created_by\` = \${BaseHelper.operatorId},
           \`updated_by\` = \${BaseHelper.operatorId}
@@ -273,13 +273,13 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
         INSERT INTO \`=[tableNameOrigin]\` SET
 =[FOR,commonFields]
 =[IFM,!isNotNeed]
-          \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName]},
+          \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName]=[IF,isTimestamp].toLocalDateTime[IFEND]},
 =[IFMEND]
 =[FOREND]
         """ +
 =[FOR,commonFields]
 =[IFM,isNotNeed]
-        request.=[scalaKey,fieldName].isDefined.optional(sql" \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get}, ") +
+        request.=[scalaKey,fieldName].isDefined.optional(sql" \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get=[IF,isTimestamp].toLocalDateTime[IFEND]}, ") +
 =[IFMEND]
 =[FOREND]
         sql"""
@@ -334,7 +334,7 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
       sql" UPDATE \`=[tableNameOrigin]\` SET " +
 =[FOR,commonFields]
 =[IFM,!isPrimaryKey]
-        request.=[scalaKey,fieldName].isDefined.optional(sql" \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get}, ") +
+        request.=[scalaKey,fieldName].isDefined.optional(sql" \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get=[IF,isTimestamp].toLocalDateTime[IFEND]}, ") +
 =[IFMEND]
 =[FOREND]
         sql" \`updated_by\` = \${BaseHelper.operatorId} WHERE \`=[primaryKeyNameOrigin]\` = \${request.=[primaryKeyName]} "
