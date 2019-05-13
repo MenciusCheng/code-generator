@@ -245,6 +245,45 @@ function parseNumber(text) {
     return obj
 }
 
+// 解析 Scala 的 serviceImpl 文件
+function parseServiceImpl(text) {
+    let obj = {}
+    let rows = []
+    text.split("\n").forEach(line => {
+        let execArray = null
+        if (execArray = /^\s*override\s+def\s+(\w+)\((\w+)\s*\:\s*(List\[\w+\]|\w+)\)\s*\:\s*(List\[\w+\]|\w+)/.exec(line)) {
+            let row = {
+                method: execArray[1],
+                param: execArray[2],
+                paramType: execArray[3],
+                resultType: execArray[4],
+                haveParam: true
+            }
+            row.haveResult = row.resultType != "Unit"
+            rows.push(row)
+        } else if (execArray = /^\s*override\s+def\s+(\w+)\(\)\s*\:\s*(List\[\w+\]|\w+)/.exec(line)) {
+            let row = {
+                method: execArray[1],
+                param: "",
+                paramType: "",
+                resultType: execArray[2],
+                haveParam: false
+            }
+            row.haveResult = row.resultType != "Unit"
+            rows.push(row)
+        } else if (execArray = /^\s*class\s+(\w+)\s+extends\s+(\w+)/.exec(line)) {
+            obj.serviceImpl = execArray[1]
+            obj.service = execArray[2]
+            let name = obj.service.substring(0, obj.service.length - 7)
+            obj.name = lowerFirst(name)
+        } else if (execArray = /^\s*package\s+([\w\.]+)/.exec(line)) {
+            obj.package = execArray[1]
+        }
+    })
+    obj.rows = rows
+    return obj
+}
+
 // 通过模板格式来渲染对象
 function transform(textArr, obj, templateArr) {
     for (let i = 0; i < templateArr.length; i++) {
@@ -428,6 +467,10 @@ function left(str, length) {
     return str.substring(0, length)
 }
 
+function leftReTail(str, length) {
+    return str.substring(0, str.length - length)
+}
+
 (function () {
     // 模板支持的普通方法
     window.supportMethod = {
@@ -445,7 +488,8 @@ function left(str, length) {
         strReTail,
         scalaKey,
         dataTypeToScalaV1,
-        left
+        left,
+        leftReTail
     }
     // 模板支持的内置方法
     window.supportInterMethod = {
@@ -458,6 +502,7 @@ function left(str, length) {
         parseSql,
         parseThrift,
         parseSqlList,
-        parseNumber
+        parseNumber,
+        parseServiceImpl
     }
 })()

@@ -82,6 +82,40 @@ class =[upperFirst,tableName] extends java.io.Serializable {
 }
 `;
 
+    let serviceImplTemplate =
+`
+=[FOR,rows]
+  override def =[method](=[IF,haveParam]=[param]: =[paramType][IFEND]): =[resultType] = new =[upperFirst,method]Action(=[param]).execute
+
+=[FOREND]
+=[FOR,rows]
+
+=[upperFirst,method]Action.scala
+--------------------------------
+
+package =[leftReTail,package,7]action.=[name]
+
+import com.ipolymer.order.sql.OrderSql.datasouce
+import com.ipolymer.soa.order.scala.domain._
+import com.ipolymer.soa.order.scala.helper.BaseHelper
+import com.isuwang.commons.Action
+import com.isuwang.commons.Assert._
+import com.isuwang.commons.converters.SqlImplicits._
+import com.isuwang.commons.converters.Implicits._
+import com.isuwang.scala_commons.sql._
+
+class =[upperFirst,method]Action(=[IF,haveParam]=[param]: =[paramType][IFEND]) extends Action[=[resultType]] {
+  override def preCheck: Unit = {}
+
+  override def action: =[resultType] = {
+=[IFM,haveResult]
+    null
+=[IFMEND]
+  }
+}
+=[FOREND]
+`;
+
     let blankTemplate = "";
 
     window.supportTemplate = {
@@ -91,7 +125,8 @@ class =[upperFirst,tableName] extends java.io.Serializable {
         serviceXmlTemplate,
         metaUITemplate,
         blankTemplate,
-        domainTableTemplate
+        domainTableTemplate,
+        serviceImplTemplate
     };
 })();
 
