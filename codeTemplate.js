@@ -116,6 +116,20 @@ class =[upperFirst,method]Action(=[IF,haveParam]=[param]: =[paramType][IFEND]) e
 =[FOREND]
 `;
 
+    let sqlEnumTemplate =
+`/**
+* =[comment]
+**/
+enum =[name] {
+=[FOR,rows]
+   /**
+   * =[eComment]
+   **/
+   =[eName] = =[value]
+=[FOREND]
+}
+`;
+
     let blankTemplate = "";
 
     window.supportTemplate = {
@@ -126,7 +140,8 @@ class =[upperFirst,method]Action(=[IF,haveParam]=[param]: =[paramType][IFEND]) e
         metaUITemplate,
         blankTemplate,
         domainTableTemplate,
-        serviceImplTemplate
+        serviceImplTemplate,
+        sqlEnumTemplate
     };
 })();
 

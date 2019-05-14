@@ -284,6 +284,49 @@ function parseServiceImpl(text) {
     return obj
 }
 
+// 解析SQL枚举
+/**
+[
+    {
+        name: "",
+        comment: "",
+        rows: [
+            {value: 1, eName: "", eComment: ""}
+        ]
+    }
+]
+
+ */
+function parseSqlEnum(text) {
+    let objs = []
+    let tableName = ""
+    text.split("\n").forEach(line => {
+        let execArray = null
+        if (execArray = /\'([\u4E00-\u9FA5\w]+),((\d+\:[\u4E00-\u9FA5\w]+\(\w+\);?)+)\'/.exec(line)) {
+            let comment = execArray[1]
+            let enums = execArray[2].split(";")
+            let rows = enums.filter(e => /(\d+)\:([\u4E00-\u9FA5\w]+)\((\w+)\)/.test(e)).map(function (e) {
+                let r = /(\d+)\:([\u4E00-\u9FA5\w]+)\((\w+)\)/.exec(e)
+                let row = {
+                    value: r[1],
+                    eComment: r[2],
+                    eName: underScore(r[3]).toUpperCase()
+                }
+                return row
+            })
+
+            let filedName = /^\s*`(\w+)`/.exec(line)[1]
+            let name = tableName + upperFirst(camelize(filedName))
+
+            objs.push({ name, comment, rows })
+        } else if (execArray = /^CREATE TABLE (?:`\w+`\.)?`(\w+)`/i.exec(line)) {
+            // 匹配表名
+            tableName = upperFirst(singular(camelize(execArray[1])))
+        }
+    })
+    return objs
+}
+
 // 通过模板格式来渲染对象
 function transform(textArr, obj, templateArr) {
     for (let i = 0; i < templateArr.length; i++) {
@@ -503,6 +546,7 @@ function leftReTail(str, length) {
         parseThrift,
         parseSqlList,
         parseNumber,
-        parseServiceImpl
+        parseServiceImpl,
+        parseSqlEnum
     }
 })()
