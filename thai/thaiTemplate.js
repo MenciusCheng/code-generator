@@ -150,33 +150,33 @@ class =[upperFirst,tableName]ServiceImpl extends =[upperFirst,tableName]Service 
 `;
 
     let dbTemplate = 
-`file:=[datasouce].scala
+`file:=[datasource].scala
 def findAll=[upperFirstAndPlural,tableName](): List[=[upperFirst,tableName]] = {
-  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0")
+  datasource.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0")
 }
 
 def find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Option[=[upperFirst,tableName]] = {
-  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
+  datasource.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
 }
 
 def exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Boolean = {
-  datasouce.queryInt(sql" SELECT COUNT(*) FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}") > 0
+  datasource.queryInt(sql" SELECT COUNT(*) FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}") > 0
 }
 
 def find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]: List[=[dataTypeToScala,primaryKeyDataType]]): List[=[upperFirst,tableName]] = {
-  datasouce.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` IN " + buildSqlIn(=[plural,primaryKeyName]))
+  datasource.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` IN " + buildSqlIn(=[plural,primaryKeyName]))
 }
 
 =[FOR,commonFields]
 =[IFM,isUniqueKey]
 def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): Option[=[upperFirst,tableName]] = {
-  datasouce.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[fieldNameOrigin]\` = \${=[scalaKey,fieldName]}")
+  datasource.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[fieldNameOrigin]\` = \${=[scalaKey,fieldName]}")
 }
 
 =[IFMEND]
 =[FOREND]
 def logicallyDelete=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Unit = {
-  datasouce.esql(sql"UPDATE \`=[tableNameOrigin]\` SET is_deleted = 1 WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
+  datasource.esql(sql"UPDATE \`=[tableNameOrigin]\` SET is_deleted = 1 WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
 }
 
 `;
@@ -185,8 +185,8 @@ def logicallyDelete=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[prima
 `file:Create=[upperFirst,tableName]Action.scala
 package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
 
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce]
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce].datasouce
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource]
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource].datasource
 import com.ipolymer.soa.=[soaName].scala.domain.TCreate=[upperFirst,tableName]Request
 import com.ipolymer.soa.=[soaName].scala.helper.BaseHelper
 import com.isuwang.commons.Action
@@ -202,11 +202,11 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
 =[FOR,commonFields]
 =[IFM,isPrimaryKey]
 =[IFM,!isAutoIncrement]
-    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldName] already exist")
+    assert(=[datasource].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldName] already exist")
 =[IFMEND]
 =[IFMEND]
 =[IFM,isUniqueKey]
-    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldName] already exist")
+    assert(=[datasource].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldName] already exist")
 =[IFMEND]
 =[FOREND]
   }
@@ -225,7 +225,7 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
           \`created_by\` = \${BaseHelper.operatorId},
           \`updated_by\` = \${BaseHelper.operatorId}
       """
-    datasouce.esql(insertSql)
+    datasource.esql(insertSql)
   }
 }
 `;
@@ -234,8 +234,8 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
 `file:Create=[upperFirst,tableName]Action.scala
 package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
 
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce]
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce].datasouce
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource]
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource].datasource
 import com.ipolymer.soa.=[soaName].scala.domain.TCreate=[upperFirst,tableName]Request
 import com.ipolymer.soa.=[soaName].scala.helper.BaseHelper
 import com.isuwang.commons.Action
@@ -252,12 +252,12 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
 =[FOR,commonFields]
 =[IFM,isPrimaryKey]
 =[IFM,!isAutoIncrement]
-    assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldName] already exist")
+    assert(=[datasource].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName]).isEmpty, "=[fieldName] already exist")
 =[IFMEND]
 =[IFMEND]
 =[IFM,isUniqueKey]
     if (request.=[fieldName].isDefined) {
-      assert(=[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get).isEmpty, "=[fieldName] already exist")
+      assert(=[datasource].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get).isEmpty, "=[fieldName] already exist")
     }
 =[IFMEND]
 =[FOREND]
@@ -286,7 +286,7 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
           \`created_by\` = \${BaseHelper.operatorId},
           \`updated_by\` = \${BaseHelper.operatorId}
         """
-    datasouce.esql(insertSql)
+    datasource.esql(insertSql)
   }
 }
 `;
@@ -295,11 +295,11 @@ let updateActionTemplate =
 `file:Update=[upperFirst,tableName]Action.scala
 package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
 
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce]
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource]
 import com.ipolymer.soa.=[soaName].scala.domain.TUpdate=[upperFirst,tableName]Request
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce].datasouce
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource].datasource
 import com.ipolymer.soa.=[soaName].scala.helper.BaseHelper
 import com.isuwang.commons.converters.SqlImplicits._
 import com.isuwang.commons.converters.Implicits._
@@ -309,7 +309,7 @@ import com.isuwang.scala_commons.sql._
   * 更新=[strReTail,tableComment]
   */
 class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName]Request) extends Action[Unit] {
-  private lazy val =[tableName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](request.=[primaryKeyName])
+  private lazy val =[tableName]Opt = =[datasource].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](request.=[primaryKeyName])
 
   override def preCheck: Unit = {
     assert(request.=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is null")
@@ -318,7 +318,7 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
 =[IFM,isUniqueKey]
 
     if (request.=[fieldName].isDefined) {
-      val =[tableName]By=[upperFirst,fieldName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get)
+      val =[tableName]By=[upperFirst,fieldName]Opt = =[datasource].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get)
       assert(=[tableName]By=[upperFirst,fieldName]Opt.isEmpty || =[tableName]By=[upperFirst,fieldName]Opt.get.=[fieldName] == =[tableName]Opt.get.=[fieldName], "=[fieldName] already exist")
     }
 =[IFMEND]
@@ -338,7 +338,7 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
 =[IFMEND]
 =[FOREND]
         sql" \`updated_by\` = \${BaseHelper.operatorId} WHERE \`=[primaryKeyNameOrigin]\` = \${request.=[primaryKeyName]} "
-    datasouce.esql(updateSql)
+    datasource.esql(updateSql)
   }
 }
 `;
@@ -349,8 +349,8 @@ package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
 
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce]
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce].datasouce
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource]
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource].datasource
 import com.isuwang.commons.converters.SqlImplicits._
 import com.isuwang.commons.converters.Implicits._
 import com.isuwang.scala_commons.sql._
@@ -361,11 +361,11 @@ import com.isuwang.scala_commons.sql._
 class Delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]) extends Action[Unit] {
   override def preCheck: Unit = {
     assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is null")
-    assert(=[datasouce].exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]), "=[tableName] not found")
+    assert(=[datasource].exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]), "=[tableName] not found")
   }
 
   override def action: Unit = {
-    =[datasouce].logicallyDelete=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
+    =[datasource].logicallyDelete=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
   }
 }
 `;
@@ -374,7 +374,7 @@ let findByKeyActionTemplate =
 `file:Find=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action.scala
 package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
 
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce]
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource]
 import com.ipolymer.soa.=[soaName].scala.domain.T=[upperFirst,tableName]
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
@@ -385,7 +385,7 @@ import com.isuwang.scala_commons.sql._
   * 通过=[primaryKeyName]查询=[strReTail,tableComment]
   */
 class Find=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]) extends Action[T=[upperFirst,tableName]] {
-  private lazy val =[tableName]Opt = =[datasouce].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
+  private lazy val =[tableName]Opt = =[datasource].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
 
   override def preCheck: Unit = {
     assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is null")
@@ -402,7 +402,7 @@ let findByKeysActionTemplate =
 `file:Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName]Action.scala
 package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
 
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce]
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource]
 import com.ipolymer.soa.=[soaName].scala.domain.T=[upperFirst,tableName]
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
@@ -417,7 +417,7 @@ class Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName
   override def preCheck: Unit = {}
 
   override def action: List[T=[upperFirst,tableName]] = {
-    =[datasouce].find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]).map(it => {
+    =[datasource].find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]).map(it => {
       BeanBuilder.build[T=[upperFirst,tableName]](it)()
     })
   }
@@ -429,7 +429,7 @@ let findPageActionTemplate =
 package com.ipolymer.soa.=[soaName].scala.action.=[tableName]
 
 import com.ipolymer.soa.common.scala.util.TPageResponse
-import com.ipolymer.soa.=[soaName].scala.db.=[datasouce].datasouce
+import com.ipolymer.soa.=[soaName].scala.db.=[datasource].datasource
 import com.ipolymer.soa.=[soaName].scala.domain._
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
@@ -445,7 +445,7 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
 
   override def action: TFind=[upperFirst,tableName]PageResponse = {
     val countSql = sql"SELECT count(*) FROM \`=[tableNameOrigin]\` "
-    val count = datasouce.getCount(countSql + whereSql)
+    val count = datasource.getCount(countSql + whereSql)
     val rows = if (count > 0) getRows else List.empty[T=[upperFirst,tableName]]
 
     new TFind=[upperFirst,tableName]PageResponse(
@@ -463,7 +463,7 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
     val selectSql = sql"SELECT * FROM \`=[tableNameOrigin]\` "
     val orderBySql = s" ORDER BY \${request.pageRequest.sortFields.getOrElse("updated_at")} DESC "
     val limitSql = sql" LIMIT \${request.pageRequest.start}, \${request.pageRequest.limit} "
-    datasouce.rows[=[upperFirst,tableName]](selectSql + whereSql + orderBySql + limitSql).map(it => BeanBuilder.build[T=[upperFirst,tableName]](it)())
+    datasource.rows[=[upperFirst,tableName]](selectSql + whereSql + orderBySql + limitSql).map(it => BeanBuilder.build[T=[upperFirst,tableName]](it)())
   }
 }
 `;

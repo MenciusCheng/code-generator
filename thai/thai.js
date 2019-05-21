@@ -44,7 +44,7 @@
 
     $('#templateTextArea').val(window.supportTemplate["bigTemplate"])
 
-    let initSql = "@=[soaName,productdb]\n@=[datasouce,ProductDB]\n"
+    let initSql = "@=[soaName,productdb]\n@=[datasource,ProductDB]\n"
     $('#sqlTextArea').val(initSql)
 
     // 自定义模板
