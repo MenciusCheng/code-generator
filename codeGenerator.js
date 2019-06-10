@@ -230,18 +230,66 @@ function parseSqlList(sql) {
 // 解析地址编码
 function parseNumber(text) {
     let obj = {}
-    let rows = []
+    let provinceRows = []
+    let cityRows = []
+    let zoneRows = []
     let execArray = null
+
     text.split("\n").forEach(line => {
-        if (execArray = /^(\d+)\t(.+)$/.exec(line)) {
-            let row = {
-                code: execArray[1],
-                name: execArray[2]
+        if (execArray = /^(\d+)\t(\d+)\t(.+)\t(\d+)\t(.+)\t(\d+)\t(.+)$/.exec(line)) {
+            let postalCode = execArray[1]
+            let code = execArray[2]
+            let name = execArray[3]
+            let cityCode = execArray[4]
+            let cityName = execArray[5]
+            let provinceCode = execArray[6]
+            let provinceName = execArray[7]
+
+            let provinceRow = {
+                code: provinceCode,
+                name: provinceName,
+                level: 1,
+                provinceCode: provinceCode,
+                fullName: provinceName
             }
-            rows.push(row)
+            if (provinceRows.every(x => x.code != provinceRow.code)) {
+                provinceRows.push(provinceRow)
+            }
+
+            let cityRow = {
+                code: cityCode,
+                name: cityName,
+                level: 2,
+                provinceCode: provinceCode,
+                cityCode: cityCode,
+                fullName: cityName + ', ' + provinceName,
+                parentCode: provinceCode,
+                postalCode: postalCode
+            }
+            if (cityRows.every(x => x.code != cityRow.code)) {
+                cityRows.push(cityRow)
+            }
+
+            let zoneRow = {
+                code: code,
+                name: name,
+                level: 3,
+                provinceCode: provinceCode,
+                cityCode: cityCode,
+                zoneCode: code,
+                fullName: name + ', ' + cityName + ', ' + provinceName,
+                parentCode: cityCode,
+                postalCode: postalCode
+            }
+            if (zoneRows.every(x => x.code != zoneRow.code)) {
+                zoneRows.push(zoneRow)
+            }
         }
     })
-    obj.rows = rows
+    obj.provinceRows = provinceRows
+    obj.cityRows = cityRows
+    obj.zoneRows = zoneRows
+
     return obj
 }
 

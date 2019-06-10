@@ -130,6 +130,21 @@ enum =[name] {
 }
 `;
 
+    let thAreaTemplate =
+`INSERT INTO \`iplm_productdb\`.\`th_area\`(\`code\`, \`name\`, \`level\`, \`province_code\`, \`city_code\`, \`zone_code\`, \`full_name\`, \`parent_code\`, \`postal_code\`) 
+VALUES 
+=[FOR,provinceRows]
+('=[code]', '=[name]', =[level], '=[provinceCode]', NULL, NULL, '=[fullName]', NULL, ''),
+=[FOREND]
+=[FOR,cityRows]
+('=[code]', '=[name]', =[level], '=[provinceCode]', '=[cityCode]', NULL, '=[fullName]', '=[parentCode]', '=[postalCode]'),
+=[FOREND]
+=[FOR,zoneRows]
+('=[code]', '=[name]', =[level], '=[provinceCode]', '=[cityCode]', '=[zoneCode]', '=[fullName]', '=[parentCode]', '=[postalCode]')=[SEP,addSeparatorComma]
+=[FOREND]
+;
+`;
+
     let blankTemplate = "";
 
     window.supportTemplate = {
@@ -141,7 +156,8 @@ enum =[name] {
         blankTemplate,
         domainTableTemplate,
         serviceImplTemplate,
-        sqlEnumTemplate
+        sqlEnumTemplate,
+        thAreaTemplate
     };
 })();
 
