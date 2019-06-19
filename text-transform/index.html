@@ -66,25 +66,25 @@
 
     <div class="row">
       <div class="col-md-4">
-        <select class="form-control" id="parserSelect">
-          <option value="parseSqlList">SQL 日志转 SQL</option>
-          <option value="parseSql">下划线转驼峰</option>
+        <select class="form-control" id="transformerSelect">
+          <option value="scalaSqlTo">Scala SQL 日志转 SQL</option>
+          <option value="camelize">下划线转驼峰</option>
         </select>
       </div>
       <div class="col-md-1">
-        <button class="btn btn-default">清空</button>
+        <button id="resetButton" class="btn btn-default">清空</button>
       </div>
       <div class="col-md-1">
-        <button class="btn btn-primary">复制</button>
+        <button id="copyResultButton" data-clipboard-target="#resultTextArea" class="btn btn-primary">复制</button>
       </div>
     </div>
 
     <div class="row">
       <div class="col-md-6">
-        <textarea class="form-control" rows="25"></textarea>
+        <textarea id="originTextArea" class="form-control" rows="25"></textarea>
       </div>
       <div class="col-md-6">
-        <textarea class="form-control" rows="25"></textarea>
+        <textarea id="resultTextArea" class="form-control" rows="25"></textarea>
       </div>
     </div>
 
@@ -95,6 +95,10 @@
   <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
   <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+
+  <script src="../lib/clipboard.min.js"></script>
+
+  <script src="./text-transform.js"></script>
 </body>
 
 </html>
