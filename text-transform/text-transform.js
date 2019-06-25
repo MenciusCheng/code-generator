@@ -86,7 +86,7 @@ function refreshThriftStructIndex(str) {
     let index = 0
 
     let strArray = str.split("\n").map(line => {
-        if (execArray = /^\s*(\d+)\s*:\s*(optional\s+)?(\w+)\s+(\w+)\s*$/.exec(line)) {
+        if (execArray = /^\s*(\d+)\s*:\s*(optional\s+)?((?:list<)?\w+(?:>)?)\s+(\w+)\s*,?\s*$/.exec(line)) {
             let matchIndex = execArray[1]
             index += 1
             return line.replace(matchIndex, index)
