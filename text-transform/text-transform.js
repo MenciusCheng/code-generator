@@ -18,6 +18,23 @@ $(document).ready(function () {
         }
     })
 
+    $('#originTextArea').bind("keydown", function (event) {
+        // Ctrl + V
+        if (event.ctrlKey && event.key.toLowerCase() == "v") {
+            setTimeout(function () {
+                let text = $('#originTextArea').val()
+                doTransformAction(text)
+            }, 100)
+        }
+    })
+
+    $('body').bind("keydown", function (event) {
+        // Ctrl + Shift + C
+        if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() == "c") {
+            $('#copyResultButton').click()
+        }
+    })
+
     new ClipboardJS('#copyResultButton');
 
     // 支持的转换器方法
