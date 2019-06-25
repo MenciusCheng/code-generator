@@ -134,7 +134,7 @@ function parseThrift(text) {
     text.split("\n").forEach(line => {
         if (execArray = /^struct (\w+)/.exec(line)) {
             obj.tableName = execArray[1]
-        } else if (execArray = /^\s+\d\s*:(\s+optional)?\s+(\w+)\s+(\w+)/.exec(line)) {
+        } else if (execArray = /^\s+\d+\s*:(\s+optional)?\s+(\w+)\s+(\w+)/.exec(line)) {
             let row = createRow()
             row.fieldName = execArray[3]
             row.dataType = execArray[2]

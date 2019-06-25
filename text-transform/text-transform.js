@@ -23,7 +23,8 @@ $(document).ready(function () {
     // 支持的转换器方法
     window.supportMethod = {
         scalaSqlTo,
-        camelize
+        camelize,
+        refreshThriftStructIndex
     }
 })
 
@@ -39,6 +40,7 @@ function doTransformAction(text) {
     }
 }
 
+// Scala SQL 日志转 SQL
 function scalaSqlTo(str) {
     let textArr = $('#originTextArea').val().split('args:')
     if (textArr.length > 1 && textArr[0] && textArr[1]) {
@@ -59,4 +61,22 @@ function scalaSqlTo(str) {
 function camelize(str) {
     const camelizeRE = /_(\w)/g
     return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
+}
+
+// 更新 thrift struct 的序号
+function refreshThriftStructIndex(str) {
+    let execArray = []
+    let index = 0
+
+    let strArray = str.split("\n").map(line => {
+        if (execArray = /^\s*(\d+)\s*:\s*(optional\s+)?(\w+)\s+(\w+)\s*$/.exec(line)) {
+            let matchIndex = execArray[1]
+            index += 1
+            return line.replace(matchIndex, index)
+        } else {
+            return line
+        }
+    })
+
+    return strArray.join("\n")
 }
