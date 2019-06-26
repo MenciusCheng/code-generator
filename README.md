@@ -9,3 +9,7 @@
 Code generators are designed to reduce your repetitive work.
 
 Generate your code from SQL statements
+
+### 更新
+
+自动提交
