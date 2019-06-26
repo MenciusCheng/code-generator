@@ -13,3 +13,7 @@ Generate your code from SQL statements
 ### 更新
 
 自动提交
+
+### Update
+
+auto git pull
