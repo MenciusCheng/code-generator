@@ -41,7 +41,8 @@ $(document).ready(function () {
     window.supportMethod = {
         scalaSqlTo,
         camelize,
-        refreshThriftStructIndex
+        refreshThriftStructIndex,
+        jiancheng
     }
 })
 
@@ -96,4 +97,18 @@ function refreshThriftStructIndex(str) {
     })
 
     return strArray.join("\n")
+}
+
+// 世界各国简称
+function jiancheng(str) {
+    let arr = str.split("\n").map(line => {
+        let execArray
+        if (execArray = /([\u4E00-\u9FA5]+)\s+(\b[\w\s]+\b)\s+(\b\w+\b)\s+([\u4E00-\u9FA5]+)\s+(\b[\w\s]+\b)/.exec(line)) {
+            return `${execArray[1]}\t${execArray[2]}\t${execArray[3]}\t${execArray[4]}\t${execArray[5]}`
+        } else {
+            return ""
+        }
+    }).filter(it => it.length > 0)
+    console.log(arr)
+    return arr.join("\n")
 }
