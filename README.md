@@ -12,8 +12,12 @@ Generate your code from SQL statements
 
 ### 更新
 
-自动提交
+- 自动发布
+- 文本转换
+- 泰国版
+- 大杀器版
+- 测试版
 
 ### Update
 
-auto git pull
+- auto publish
