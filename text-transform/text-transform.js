@@ -42,7 +42,8 @@ $(document).ready(function () {
         scalaSqlTo,
         camelize,
         refreshThriftStructIndex,
-        jiancheng
+        jiancheng,
+        areaCommon
     }
 })
 
@@ -105,6 +106,111 @@ function jiancheng(str) {
         let execArray
         if (execArray = /([\u4E00-\u9FA5]+)\s+(\b[\w\s]+\b)\s+(\b\w+\b)\s+([\u4E00-\u9FA5]+)\s+(\b[\w\s]+\b)/.exec(line)) {
             return `${execArray[1]}\t${execArray[2]}\t${execArray[3]}\t${execArray[4]}\t${execArray[5]}`
+        } else {
+            return ""
+        }
+    }).filter(it => it.length > 0)
+    console.log(arr)
+    return arr.join("\n")
+}
+
+// 路线地址
+function areaCommon(str) {
+    let arr = str.split("\n").map(line => {
+        let execArray
+        if (execArray = /(.+)\t(.+)\t(.+)\t(.+)\t(.+)\t(.+)\t(.+)\t(.+)\t(.+)\t(.+)\t(.+)/.exec(line)) {
+
+            let price_1st_phase = 0
+            let cost_1st_phase = 0
+            let price_2st_phase = 0
+            let cost_2st_phase = 0
+            let price_3st_phase = 0
+            let cost_3st_phase = 0
+            let price_4st_phase = 0
+            let cost_4st_phase = 0
+            let price_5st_phase = 0
+            let cost_5st_phase = 0
+            let price_6st_phase = 0
+            let cost_6st_phase = 0
+            let price_7st_phase = 0
+            let cost_7st_phase = 0
+            let price_8st_phase = 0
+            let cost_8st_phase = 0
+
+            let destinationName = execArray[2]
+            let _1st_phase = execArray[4]
+            if (_1st_phase.trimStart().startsWith("吨位价")) {
+                price_1st_phase = /\d+/.exec(_1st_phase)[0]
+            } else if (_1st_phase.trimStart().startsWith("整车价")) {
+                cost_1st_phase = /\d+/.exec(_1st_phase)[0]
+            } else {
+                console.error("格式有误")
+            }
+
+            let _2st_phase = execArray[5]
+            if (_2st_phase.trimStart().startsWith("吨位价")) {
+                price_2st_phase = /\d+/.exec(_2st_phase)[0]
+            } else if (_2st_phase.trimStart().startsWith("整车价")) {
+                cost_2st_phase = /\d+/.exec(_2st_phase)[0]
+            } else {
+                console.error("格式有误")
+            }
+
+            let _3st_phase = execArray[6]
+            if (_3st_phase.trimStart().startsWith("吨位价")) {
+                price_3st_phase = /\d+/.exec(_3st_phase)[0]
+            } else if (_3st_phase.trimStart().startsWith("整车价")) {
+                cost_3st_phase = /\d+/.exec(_3st_phase)[0]
+            } else {
+                console.error("格式有误")
+            }
+
+            let _4st_phase = execArray[7]
+            if (_4st_phase.trimStart().startsWith("吨位价")) {
+                price_4st_phase = /\d+/.exec(_4st_phase)[0]
+            } else if (_4st_phase.trimStart().startsWith("整车价")) {
+                cost_4st_phase = /\d+/.exec(_4st_phase)[0]
+            } else {
+                console.error("格式有误")
+            }
+
+            let _5st_phase = execArray[8]
+            if (_5st_phase.trimStart().startsWith("吨位价")) {
+                price_5st_phase = /\d+/.exec(_5st_phase)[0]
+            } else if (_5st_phase.trimStart().startsWith("整车价")) {
+                cost_5st_phase = /\d+/.exec(_5st_phase)[0]
+            } else {
+                console.error("格式有误")
+            }
+
+            let _6st_phase = execArray[9]
+            if (_6st_phase.trimStart().startsWith("吨位价")) {
+                price_6st_phase = /\d+/.exec(_6st_phase)[0]
+            } else if (_6st_phase.trimStart().startsWith("整车价")) {
+                cost_6st_phase = /\d+/.exec(_6st_phase)[0]
+            } else {
+                console.error("格式有误")
+            }
+
+            let _7st_phase = execArray[10]
+            if (_7st_phase.trimStart().startsWith("吨位价")) {
+                price_7st_phase = /\d+/.exec(_7st_phase)[0]
+            } else if (_7st_phase.trimStart().startsWith("整车价")) {
+                cost_7st_phase = /\d+/.exec(_7st_phase)[0]
+            } else {
+                console.error("格式有误")
+            }
+
+            let _8st_phase = execArray[11]
+            if (_8st_phase.trimStart().startsWith("吨位价")) {
+                price_8st_phase = /\d+/.exec(_8st_phase)[0]
+            } else if (_8st_phase.trimStart().startsWith("整车价")) {
+                cost_8st_phase = /\d+/.exec(_8st_phase)[0]
+            } else {
+                console.error("格式有误")
+            }
+
+            return `("4406", "${destinationName}", ${price_1st_phase}, ${cost_1st_phase}, ${price_2st_phase}, ${cost_2st_phase}, ${price_3st_phase}, ${cost_3st_phase}, ${price_4st_phase}, ${cost_4st_phase}, ${price_5st_phase}, ${cost_5st_phase}, ${price_6st_phase}, ${cost_6st_phase}, ${price_7st_phase}, ${cost_7st_phase}, ${price_8st_phase}, ${cost_8st_phase}),`
         } else {
             return ""
         }
