@@ -64,7 +64,7 @@ function scalaSqlTo(str) {
     let textArr = $('#originTextArea').val().split('args:')
     if (textArr.length > 1 && textArr[0] && textArr[1]) {
         let sql = textArr[0]
-        let jdbcValues = textArr[1].split("JdbcValue").filter(it=> /\((.+?)\)/.test(it)).map(it => "'" + /\((.+?)\)/.exec(it)[1] + "'")
+        let jdbcValues = textArr[1].split("JdbcValue").filter(it=> /\((.*?)\)/.test(it)).map(it => "'" + /\((.*?)\)/.exec(it)[1] + "'")
         let result = sql
 
         jdbcValues.forEach(it => {
