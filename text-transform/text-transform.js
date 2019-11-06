@@ -64,16 +64,33 @@ function scalaSqlTo(str) {
     let textArr = $('#originTextArea').val().split('args:')
     if (textArr.length > 1 && textArr[0] && textArr[1]) {
         let sql = textArr[0]
-        let jdbcValues = textArr[1].split("JdbcValue").filter(it=> /\((.*?)\)/.test(it)).map(it => "'" + /\((.*?)\)/.exec(it)[1] + "'")
-        let result = sql
+        let value = textArr[1]
+        let valueArray = []
 
-        jdbcValues.forEach(it => {
+        if (value.indexOf("JdbcValue") > -1) {
+            valueArray = reJdbcValue(value)
+        } else if (value.indexOf("ArrayBuffer") > -1) {
+            valueArray = reArrayBuffer(value)
+        }
+
+        let result = sql
+        valueArray.forEach(it => {
             result = result.replace("?", it)
         })
         return result;
     } else {
         return '转换失败'
     }
+}
+
+// WrappedArray(JdbcValue(6), JdbcValue(40)) => ["'6'", "'40'"]
+function reJdbcValue(str) {
+    return str.split("JdbcValue").filter(it=> /\((.*?)\)/.test(it)).map(it => "'" + /\((.*?)\)/.exec(it)[1] + "'")
+}
+
+// ArrayBuffer(2121, 1) => ["'2121'", "'1'"]
+function reArrayBuffer(str) {
+    return /\((.*?)\)/.exec(str)[1].split(',').map(it => "'" + it.trim() + "'")
 }
 
 // 下划线转驼峰
