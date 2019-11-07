@@ -68,8 +68,10 @@ function scalaSqlTo(str) {
         let valueArray = []
 
         if (value.indexOf("JdbcValue") > -1) {
+            // 有 JdbcValue 字样，为新版 SQL 日志
             valueArray = reJdbcValue(value)
-        } else if (value.indexOf("ArrayBuffer") > -1) {
+        } else {
+            // 无 JdbcValue 字样，旧版 SQL 日志
             valueArray = reArrayBuffer(value)
         }
 
