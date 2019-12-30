@@ -461,6 +461,12 @@ function lowerFirst(str) {
     return str ? str[0].toLowerCase() + str.slice(1, str.length) : str
 }
 
+// 所有字母转小写
+function lowerAll(str) {
+    const upperRE = /([A-Z])/g
+    return str ? str.replace(upperRE, (_, a) => a.toLowerCase()) : str
+}
+
 // 单词转复数
 function plural(str) {
     return pluralize.plural(str)
@@ -569,6 +575,7 @@ function leftReTail(str, length) {
         underScore,
         upperFirst,
         lowerFirst,
+        lowerAll,
         plural,
         singular,
         upperFirstAndPlural,
