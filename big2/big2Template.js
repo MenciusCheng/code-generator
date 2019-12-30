@@ -4,7 +4,7 @@
 
     let thriftDomainTemplate = 
 `file:=[singular,tableNameOrigin]_domain.thrift
-namespace java com.isuwang.soa.=[soaName].domain
+namespace java com.isuwang.soa.=[apiPackage].domain
 include "base_model.thrift"
 
 /**
@@ -64,7 +64,7 @@ struct TFind=[upperFirst,tableName]PageResponse {
 
     let thrfitServiceTemplate = 
 `file:=[singular,tableNameOrigin]_service.thrift
-namespace java com.isuwang.soa.=[soaName].service
+namespace java com.isuwang.soa.=[apiPackage].service
 include "=[singular,tableNameOrigin]_domain.thrift"
 
 /**
@@ -95,19 +95,12 @@ service =[upperFirst,tableName]Service {
     * 分页查询=[strReTail,tableComment]
     **/
     =[singular,tableNameOrigin]_domain.TFind=[upperFirst,tableName]PageResponse find=[upperFirst,tableName]Page(=[singular,tableNameOrigin]_domain.TFind=[upperFirst,tableName]PageRequest request)
-=[IFM,haveDisabledKey]
-    /**
-    * 禁用=[strReTail,tableComment]
-    * @param disabled 值为 true 禁用，false 启用
-    **/
-    void disable=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[dataTypeToThrift,primaryKeyDataType] =[primaryKeyName], bool disabled)
-=[IFMEND]
 }
 `;
 
     let caseClassTemplate =
 `file:=[upperFirst,tableName].scala
-package com.isuwang.soa.=[soaName].scala.domain
+package com.isuwang.soa.=[servicePackage].scala.domain
 
 import java.time.LocalDateTime
 import com.isuwang.scala_commons.sql.ResultSetMapper
@@ -127,55 +120,39 @@ object =[upperFirst,tableName] {
 
     let serviceImplTemplate = 
 `file:=[upperFirst,tableName]ServiceImpl.scala
-package com.isuwang.soa.=[soaName].scala.service
+package com.isuwang.soa.=[servicePackage].scala.service
 
-import com.isuwang.soa.=[soaName].scala.domain._
-import com.isuwang.soa.=[soaName].scala.action.=[tableName]._
 import org.springframework.transaction.annotation.Transactional
+import com.isuwang.soa.=[apiPackage].scala.service.=[upperFirst,tableName]Service
+import com.isuwang.soa.=[servicePackage].scala.action.=[lowerAll,tableName]._
 
-@Transactional(value = "=[soaName]", rollbackFor = Array(classOf[Exception]))
+@Transactional(value = "=[datasource]", rollbackFor = Array(classOf[Exception]))
 class =[upperFirst,tableName]ServiceImpl extends =[upperFirst,tableName]Service {
-  override def create=[upperFirst,tableName](request: TCreate=[upperFirst,tableName]Request): Unit = new Create=[upperFirst,tableName]Action(request).execute
 
-  override def update=[upperFirst,tableName](request: TUpdate=[upperFirst,tableName]Request): Unit = new Update=[upperFirst,tableName]Action(request).execute
-
-  override def delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Unit = new Delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]).execute
-
-  override def find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): T=[upperFirst,tableName] = new Find=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]).execute
-
-  override def find=[upperFirst,tableName]Page(request: TFind=[upperFirst,tableName]PageRequest): TFind=[upperFirst,tableName]PageResponse = new Find=[upperFirst,tableName]PageAction(request).execute
-
-  override def find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]: List[=[dataTypeToScala,primaryKeyDataType]]): List[T=[upperFirst,tableName]] = new Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName]Action(=[plural,primaryKeyName]).execute
 }
 `;
 
     let dbTemplate = 
-`file:=[datasource].scala
-
+`file:=[upperFirst,tableName]SQL.scala
 def find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Option[=[upperFirst,tableName]] = {
-  datasource.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
+  datasource.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
 }
 
 def exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Boolean = {
-  datasource.queryInt(sql" SELECT COUNT(*) FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}") > 0
+  datasource.queryInt(sql" SELECT COUNT(*) FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}") > 0
 }
 
 def find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]: List[=[dataTypeToScala,primaryKeyDataType]]): List[=[upperFirst,tableName]] = {
-  datasource.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[primaryKeyNameOrigin]\` IN " + buildSqlIn(=[plural,primaryKeyName]))
+  datasource.rows[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[primaryKeyNameOrigin]\` IN " + buildSqlIn(=[plural,primaryKeyName]))
 }
-
 =[FOR,commonFields]
 =[IFM,isUniqueKey]
-def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: String): Option[=[upperFirst,tableName]] = {
-  datasource.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE is_deleted = 0 AND \`=[fieldNameOrigin]\` = \${=[scalaKey,fieldName]}")
-}
 
+def find=[upperFirst,tableName]By=[upperFirst,fieldName](=[fieldName]: =[dataTypeToScala,dataType]): Option[=[upperFirst,tableName]] = {
+  datasource.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` WHERE \`=[fieldNameOrigin]\` = \${=[scalaKey,fieldName]}")
+}
 =[IFMEND]
 =[FOREND]
-def logicallyDelete=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]): Unit = {
-  datasource.esql(sql"UPDATE \`=[tableNameOrigin]\` SET is_deleted = 1 WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}")
-}
-
 `;
 
   let createActionTemplate = 
@@ -240,33 +217,33 @@ class Create=[upperFirst,tableName]Action(request: TCreate=[upperFirst,tableName
 
 let updateActionTemplate = 
 `file:Update=[upperFirst,tableName]Action.scala
-package com.isuwang.soa.=[soaName].scala.action.=[tableName]
+package com.isuwang.soa.=[servicePackage].scala.action.=[lowerAll,tableName]
 
-import com.isuwang.soa.=[soaName].scala.db.=[datasource]
-import com.isuwang.soa.=[soaName].scala.domain.TUpdate=[upperFirst,tableName]Request
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
-import com.isuwang.soa.=[soaName].scala.db.=[datasource].datasource
-import com.isuwang.soa.=[soaName].scala.helper.BaseHelper
 import com.isuwang.commons.converters.SqlImplicits._
 import com.isuwang.commons.converters.Implicits._
 import com.isuwang.scala_commons.sql._
+import com.isuwang.soa.=[servicePackage].scala.utils.BaseHelper
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL.datasource
+import com.isuwang.soa.=[apiPackage].scala.domain.TUpdate=[upperFirst,tableName]Request
 
 /**
   * 更新=[strReTail,tableComment]
   */
 class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName]Request) extends Action[Unit] {
-  private lazy val =[tableName]Opt = =[datasource].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](request.=[primaryKeyName])
+  private lazy val =[tableName]Opt = =[upperFirst,tableName]SQL.find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](request.=[primaryKeyName])
 
   override def preCheck: Unit = {
-    assert(request.=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is null")
-    assert(=[tableName]Opt.isDefined, "=[tableName] not found")
+    assert(request.=[primaryKeyName].isNotEmpty, "=[primaryKeyName] 为空")
+    assert(=[tableName]Opt.isDefined, "=[tableName] 不存在")
 =[FOR,commonFields]
 =[IFM,isUniqueKey]
 
     if (request.=[fieldName].isDefined) {
-      val =[tableName]By=[upperFirst,fieldName]Opt = =[datasource].find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get)
-      assert(=[tableName]By=[upperFirst,fieldName]Opt.isEmpty || =[tableName]By=[upperFirst,fieldName]Opt.get.=[fieldName] == =[tableName]Opt.get.=[fieldName], "=[fieldName] already exist")
+      val =[tableName]By=[upperFirst,fieldName]Opt = =[upperFirst,tableName]SQL.find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get)
+      assert(=[tableName]By=[upperFirst,fieldName]Opt.isEmpty || =[tableName]By=[upperFirst,fieldName]Opt.get.=[fieldName] == =[tableName]Opt.get.=[fieldName], "=[fieldName] 已存在")
     }
 =[IFMEND]
 =[FOREND]
@@ -292,70 +269,72 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
 
 let deleteActionTemplate = 
 `file:Delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action.scala
-package com.isuwang.soa.=[soaName].scala.action.=[tableName]
+package com.isuwang.soa.=[servicePackage].scala.action.=[lowerAll,tableName]
 
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
-import com.isuwang.soa.=[soaName].scala.db.=[datasource]
-import com.isuwang.soa.=[soaName].scala.db.=[datasource].datasource
 import com.isuwang.commons.converters.SqlImplicits._
 import com.isuwang.commons.converters.Implicits._
 import com.isuwang.scala_commons.sql._
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL.datasource
 
 /**
   * 删除=[strReTail,tableComment]
   */
 class Delete=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]) extends Action[Unit] {
   override def preCheck: Unit = {
-    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is null")
-    assert(=[datasource].exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]), "=[tableName] not found")
+    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] 为空")
+    assert(=[upperFirst,tableName]SQL.exist=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName]), "=[tableName] 不存在")
   }
 
   override def action: Unit = {
-    =[datasource].logicallyDelete=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
+    val deleteSql = sql"UPDATE \`=[tableNameOrigin]\` SET \`is_deleted\` = 1 WHERE \`=[primaryKeyNameOrigin]\` = \${=[primaryKeyName]}"
+    datasource.esql(deleteSql)
   }
 }
 `;
 
 let findByKeyActionTemplate = 
 `file:Find=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action.scala
-package com.isuwang.soa.=[soaName].scala.action.=[tableName]
+package com.isuwang.soa.=[servicePackage].scala.action.=[lowerAll,tableName]
 
-import com.isuwang.soa.=[soaName].scala.db.=[datasource]
-import com.isuwang.soa.=[soaName].scala.domain.T=[upperFirst,tableName]
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
+import com.isuwang.commons.converters.SqlImplicits._
 import com.isuwang.commons.converters.Implicits._
 import com.isuwang.scala_commons.sql._
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL
+import com.isuwang.soa.=[apiPackage].scala.domain.T=[upperFirst,tableName]
 
 /**
   * 通过=[primaryKeyName]查询=[strReTail,tableComment]
   */
 class Find=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]) extends Action[T=[upperFirst,tableName]] {
-  private lazy val =[tableName]Opt = =[datasource].find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
+  private lazy val =[plural,tableName] = new Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName]Action(List(=[primaryKeyName])).execute
 
   override def preCheck: Unit = {
-    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] is null")
-    assert(=[tableName]Opt.isDefined, "=[tableName] not found")
+    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] 为空")
+    assert(=[plural,tableName].nonEmpty, "=[tableName] 不存在")
   }
 
   override def action: T=[upperFirst,tableName] = {
-    BeanBuilder.build[T=[upperFirst,tableName]](=[tableName]Opt.get)()
+    =[plural,tableName].head
   }
 }
 `;
 
 let findByKeysActionTemplate = 
 `file:Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName]Action.scala
-package com.isuwang.soa.=[soaName].scala.action.=[tableName]
+package com.isuwang.soa.=[servicePackage].scala.action.=[lowerAll,tableName]
 
-import com.isuwang.soa.=[soaName].scala.db.=[datasource]
-import com.isuwang.soa.=[soaName].scala.domain.T=[upperFirst,tableName]
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
-import com.isuwang.scala_commons.sql._
 import com.isuwang.commons.converters.SqlImplicits._
 import com.isuwang.commons.converters.Implicits._
+import com.isuwang.scala_commons.sql._
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL
+import com.isuwang.soa.=[apiPackage].scala.domain.T=[upperFirst,tableName]
 
 /**
   * 通过=[plural,primaryKeyName]查询=[strReTail,tableComment]列表
@@ -364,25 +343,63 @@ class Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName
   override def preCheck: Unit = {}
 
   override def action: List[T=[upperFirst,tableName]] = {
-    =[datasource].find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]).map(it => {
+    =[upperFirst,tableName]SQL.find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName](=[plural,primaryKeyName]).map(it => {
       BeanBuilder.build[T=[upperFirst,tableName]](it)()
     })
   }
 }
 `;
 
-let findPageActionTemplate = 
-`file:Find=[upperFirst,tableName]PageAction.scala
-package com.isuwang.soa.=[soaName].scala.action.=[tableName]
+let findOneActionTemplate = 
+`file:FindOne=[upperFirst,tableName]Action.scala
+package com.isuwang.soa.=[servicePackage].scala.action.=[lowerAll,tableName]
 
-import com.isuwang.soa.common.scala.util.TPageResponse
-import com.isuwang.soa.=[soaName].scala.db.=[datasource].datasource
-import com.isuwang.soa.=[soaName].scala.domain._
 import com.isuwang.commons.Action
 import com.isuwang.commons.Assert._
-import com.isuwang.commons.converters.Implicits._
 import com.isuwang.commons.converters.SqlImplicits._
+import com.isuwang.commons.converters.Implicits._
 import com.isuwang.scala_commons.sql._
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL.datasource
+import com.isuwang.soa.=[apiPackage].scala.domain.{TFindOne=[upperFirst,tableName]Request, T=[upperFirst,tableName]}
+
+/**
+  * 查询一个=[strReTail,tableComment]
+  */
+class FindOne=[upperFirst,tableName]Action(request: TFindOne=[upperFirst,tableName]Request) extends Action[T=[upperFirst,tableName]] {
+  private lazy val =[tableName]Opt = datasource.row[MessageUser](sql" SELECT * FROM \`message_user\` " + whereSql)
+
+  override def preCheck: Unit = {
+    assert(=[tableName]Opt.isDefined, "=[tableName] 不存在")
+  }
+
+  override def action: T=[upperFirst,tableName] = {
+    BeanBuilder.build[T=[upperFirst,tableName]](=[tableName]Opt.get)()
+  }
+
+  private lazy val whereSql = sql" WHERE 1 = 1 " +
+    request.=[primaryKeyName].isDefined.optional(sql" AND \`=[primaryKeyName]\` = \${request.=[primaryKeyName].get} ") +
+=[FOR,commonFields]
+=[IFM,isUniqueKey]
+    request.=[scalaKey,fieldName].isDefined.optional(sql" AND \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get} ") =[SEP,addSeparatorPlus]
+=[IFMEND]
+=[FOREND]
+}
+`;
+
+let findPageActionTemplate = 
+`file:Find=[upperFirst,tableName]PageAction.scala
+package com.isuwang.soa.=[servicePackage].scala.action.=[lowerAll,tableName]
+
+import com.isuwang.commons.Action
+import com.isuwang.commons.Assert._
+import com.isuwang.commons.converters.SqlImplicits._
+import com.isuwang.commons.converters.Implicits._
+import com.isuwang.scala_commons.sql._
+import com.isuwang.soa.common.scala.util.TPageResponse
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL.datasource
+import com.isuwang.soa.=[apiPackage].scala.domain._
 
 /**
   * 分页查询=[strReTail,tableComment]
@@ -401,14 +418,14 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
     )
   }
 
-  private lazy val whereSql = sql" WHERE is_deleted = 0 " +
+  private lazy val whereSql = sql" WHERE 1 = 1 " +
 =[FOR,commonFields]
     request.=[scalaKey,fieldName].isDefined.optional(sql" AND \`=[fieldNameOrigin]\` = \${request.=[scalaKey,fieldName].get} ") =[SEP,addSeparatorPlus]
 =[FOREND]
 
   private def getRows: List[T=[upperFirst,tableName]] = {
     val selectSql = sql"SELECT * FROM \`=[tableNameOrigin]\` "
-    val orderBySql = s" ORDER BY \${request.pageRequest.sortFields.getOrElse("updated_at")} DESC "
+    val orderBySql = s" ORDER BY \${request.pageRequest.sortFields.getOrElse("updated_at DESC")} "
     val limitSql = sql" LIMIT \${request.pageRequest.start}, \${request.pageRequest.limit} "
     datasource.rows[=[upperFirst,tableName]](selectSql + whereSql + orderBySql + limitSql).map(it => BeanBuilder.build[T=[upperFirst,tableName]](it)())
   }
@@ -417,7 +434,7 @@ class Find=[upperFirst,tableName]PageAction(request: TFind=[upperFirst,tableName
 
 let serviceXmlTemplate = 
 `file:services.xml
-    <bean id="=[tableName]Service" class="com.isuwang.soa.=[soaName].scala.service.=[upperFirst,tableName]ServiceImpl"/>
+    <bean id="=[tableName]Service" class="com.isuwang.soa.=[servicePackage].scala.service.=[upperFirst,tableName]ServiceImpl"/>
     <soa:service ref="=[tableName]Service"/>
 `;
 
@@ -429,9 +446,11 @@ let serviceXmlTemplate =
         createActionTemplate + 
         updateActionTemplate + 
         deleteActionTemplate + 
-        findByKeyActionTemplate + 
         findByKeysActionTemplate +
-        findPageActionTemplate;
+        findByKeyActionTemplate + 
+        findOneActionTemplate +
+        findPageActionTemplate +
+        serviceXmlTemplate;
 
     window.supportTemplate = {
         thriftDomainTemplate,
