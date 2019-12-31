@@ -350,6 +350,35 @@ class Find=[upperFirstAndPlural,tableName]By=[upperFirstAndPlural,primaryKeyName
 }
 `;
 
+let findByKeyActionTemplate2 = 
+`file:Find=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action.scala
+package com.isuwang.soa.=[servicePackage].scala.action.=[lowerAll,tableName]
+
+import com.isuwang.commons.Action
+import com.isuwang.commons.Assert._
+import com.isuwang.commons.converters.SqlImplicits._
+import com.isuwang.commons.converters.Implicits._
+import com.isuwang.scala_commons.sql._
+import com.isuwang.soa.=[servicePackage].scala.db.=[upperFirst,tableName]SQL
+import com.isuwang.soa.=[apiPackage].scala.domain.T=[upperFirst,tableName]
+
+/**
+  * 通过=[primaryKeyName]查询=[strReTail,tableComment]
+  */
+class Find=[upperFirst,tableName]By=[upperFirst,primaryKeyName]Action(=[primaryKeyName]: =[dataTypeToScala,primaryKeyDataType]) extends Action[T=[upperFirst,tableName]] {
+  private lazy val =[tableName]Opt = =[upperFirst,tableName]SQL.find=[upperFirst,tableName]By=[upperFirst,primaryKeyName](=[primaryKeyName])
+
+  override def preCheck: Unit = {
+    assert(=[primaryKeyName].isNotEmpty, "=[primaryKeyName] 为空")
+    assert(=[tableName]Opt.isDefined, "=[tableName] 不存在")
+  }
+
+  override def action: T=[upperFirst,tableName] = {
+    BeanBuilder.build[T=[upperFirst,tableName]](=[tableName]Opt.get)()
+  }
+}
+`;
+
 let findOneActionTemplate = 
 `file:FindOne=[upperFirst,tableName]Action.scala
 package com.isuwang.soa.=[servicePackage].scala.action.=[lowerAll,tableName]
@@ -367,8 +396,6 @@ import com.isuwang.soa.=[apiPackage].scala.domain.{TFindOne=[upperFirst,tableNam
   * 查询一个=[strReTail,tableComment]
   */
 class FindOne=[upperFirst,tableName]Action(request: TFindOne=[upperFirst,tableName]Request) extends Action[T=[upperFirst,tableName]] {
-  private lazy val =[tableName]Opt = datasource.row[MessageUser](sql" SELECT * FROM \`message_user\` " + whereSql)
-
   override def preCheck: Unit = {
     assert(=[tableName]Opt.isDefined, "=[tableName] 不存在")
   }
@@ -376,6 +403,8 @@ class FindOne=[upperFirst,tableName]Action(request: TFindOne=[upperFirst,tableNa
   override def action: T=[upperFirst,tableName] = {
     BeanBuilder.build[T=[upperFirst,tableName]](=[tableName]Opt.get)()
   }
+
+  private lazy val =[tableName]Opt = datasource.row[=[upperFirst,tableName]](sql" SELECT * FROM \`=[tableNameOrigin]\` " + whereSql)
 
   private lazy val whereSql = sql" WHERE 1 = 1 " +
     request.=[primaryKeyName].isDefined.optional(sql" AND \`=[primaryKeyName]\` = \${request.=[primaryKeyName].get} ") +
@@ -448,6 +477,7 @@ let serviceXmlTemplate =
         deleteActionTemplate + 
         findByKeysActionTemplate +
         findByKeyActionTemplate + 
+        findByKeyActionTemplate2 +
         findOneActionTemplate +
         findPageActionTemplate +
         serviceXmlTemplate;
