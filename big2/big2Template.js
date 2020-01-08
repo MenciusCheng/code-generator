@@ -243,7 +243,7 @@ class Update=[upperFirst,tableName]Action(request: TUpdate=[upperFirst,tableName
 
     if (request.=[fieldName].isDefined) {
       val =[tableName]By=[upperFirst,fieldName]Opt = =[upperFirst,tableName]SQL.find=[upperFirst,tableName]By=[upperFirst,fieldName](request.=[fieldName].get)
-      assert(=[tableName]By=[upperFirst,fieldName]Opt.isEmpty || =[tableName]By=[upperFirst,fieldName]Opt.get.=[fieldName] == =[tableName]Opt.get.=[fieldName], "=[fieldName] 已存在")
+      assert(=[tableName]By=[upperFirst,fieldName]Opt.isEmpty || =[tableName]By=[upperFirst,fieldName]Opt.get.=[primaryKeyName] == =[tableName]Opt.get.=[primaryKeyName], "=[fieldName] 已存在")
     }
 =[IFMEND]
 =[FOREND]
