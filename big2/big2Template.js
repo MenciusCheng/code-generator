@@ -12,14 +12,12 @@ include "base_model.thrift"
 **/
 struct T=[upperFirst,tableName] {
 =[FOR,rows]
-=[IFM,!isDeletedKey]
 =[IFM,fieldComment]
     /**
     * =[fieldComment]
     **/
 =[IFMEND]
     =[forIndex]:=[IF,isOptional] optional[IFEND] =[dataTypeToThrift,dataType] =[fieldName]
-=[IFMEND]
 =[FOREND]
 }
 
