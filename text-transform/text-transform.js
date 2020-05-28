@@ -41,6 +41,7 @@ $(document).ready(function () {
     window.supportMethod = {
         scalaSqlTo,
         camelize,
+        snakecase,
         refreshThriftStructIndex,
         jiancheng,
         areaCommon
@@ -99,6 +100,12 @@ function reArrayBuffer(str) {
 function camelize(str) {
     const camelizeRE = /_(\w)/g
     return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
+}
+
+// 驼峰转下划线
+function snakecase(str) {
+    const snakecaseRE = /[a-z]([A-Z])/g
+    return str.replace(snakecaseRE, (_, c) => c ? '_' + c.toLowerCase() : '')
 }
 
 // 更新 thrift struct 的序号
