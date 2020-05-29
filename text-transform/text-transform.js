@@ -104,8 +104,8 @@ function camelize(str) {
 
 // 驼峰转下划线
 function snakecase(str) {
-    const snakecaseRE = /[a-z]([A-Z])/g
-    return str.replace(snakecaseRE, (_, c) => c ? '_' + c.toLowerCase() : '')
+    const snakecaseRE = /([a-z])([A-Z])/g
+    return str.replace(snakecaseRE, (match, p1, p2) => match ? p1 + '_' + p2.toLowerCase() : '')
 }
 
 // 更新 thrift struct 的序号
