@@ -145,6 +145,12 @@ VALUES
 ;
 `;
 
+    let htTemplate =
+`=[FOR,items]
+=[a1], =[a2]
+=[FOREND]
+`;
+
     let blankTemplate = "";
 
     window.supportTemplate = {
@@ -157,7 +163,8 @@ VALUES
         domainTableTemplate,
         serviceImplTemplate,
         sqlEnumTemplate,
-        thAreaTemplate
+        thAreaTemplate,
+        htTemplate
     };
 })();
 

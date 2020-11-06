@@ -436,6 +436,27 @@ function transform(textArr, obj, templateArr) {
     }
 }
 
+// 解析水平制表分隔符
+function parseHTList(text) {
+    let obj = {}
+    let items = []
+
+    text.split("\n").forEach(line => {
+        let value = {}
+        let cols = line.split("\t")
+
+        let index = 0
+        cols.forEach(c => {
+            index += 1
+            value["a"+index] = c
+        })
+        items.push(value)
+    })
+    obj.items = items
+
+    return obj
+}
+
 
 // ========= 支持的方法 ========= 
 
@@ -602,6 +623,7 @@ function leftReTail(str, length) {
         parseSqlList,
         parseNumber,
         parseServiceImpl,
-        parseSqlEnum
+        parseSqlEnum,
+        parseHTList
     }
 })()
