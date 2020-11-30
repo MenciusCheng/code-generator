@@ -442,7 +442,7 @@ function parseHTList(text) {
     let items = []
 
     text.split("\n").forEach(line => {
-        let value = {}
+        let value = {a0:line}
         let cols = line.split("\t")
 
         let index = 0
