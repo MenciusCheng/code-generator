@@ -33,7 +33,7 @@ function parseSql(sql) {
     let obj = createSqlObj()
     let rows = []
     let execArray = null
-    let uncommonFieldList = ["id","createdAt","createdBy","updatedAt","updatedBy","isDeleted"]
+    let uncommonFieldList = ["id", "createdAt", "createdBy", "updatedAt", "updatedBy", "isDeleted"]
     // let uniqueCheckList = ["name"]
 
     sql.split("\n").forEach(line => {
@@ -91,7 +91,7 @@ function parseSql(sql) {
             // 匹配主键
             let fieldName = camelize(execArray[1])
             let row = rows.find(r => r.fieldName === fieldName)
-            if (row) { 
+            if (row) {
                 row.isPrimaryKey = true
                 obj.primaryKeyName = row.fieldName
                 obj.primaryKeyNameOrigin = row.fieldNameOrigin
@@ -153,7 +153,7 @@ function parseSqlList(sql) {
     let diy = {}
     let rows = []
     let execArray = null
-    let uncommonFieldList = ["id","createdAt","createdBy","updatedAt","updatedBy"]
+    let uncommonFieldList = ["id", "createdAt", "createdBy", "updatedAt", "updatedBy"]
 
     sql.split("\n").forEach(line => {
 
@@ -164,7 +164,7 @@ function parseSqlList(sql) {
                 result.push(obj)
                 obj = createSqlObj()
             }
-            
+
             // 匹配表名
             obj.tableName = singular(camelize(execArray[1]))
             obj.tableNameOrigin = execArray[1]
@@ -201,7 +201,7 @@ function parseSqlList(sql) {
             // 匹配主键
             let fieldName = camelize(execArray[1])
             let row = rows.find(r => r.fieldName === fieldName)
-            if (row) { 
+            if (row) {
                 row.isPrimaryKey = true
                 obj.primaryKeyName = row.fieldName
                 obj.primaryKeyNameOrigin = row.fieldNameOrigin
@@ -420,9 +420,14 @@ function transform(textArr, obj, templateArr) {
             }
             let arr = obj[execArray[1]]
             arr.forEach((v, k) => {
-                let value = Object.assign({forIndex: k + 1, forLength: arr.length}, obj, v)
+                let value = Object.assign({ forIndex: k + 1, forLength: arr.length }, obj, v)
                 transform(textArr, value, tempArr)
             })
+        } else if (execArray = /^\s*=\[FUNC,(\w+)\]=(.+)/.exec(templateLine)) {
+            // 注入一个自定义方法
+            let fnName = execArray[1]
+            let fnDefine = execArray[2]
+            eval("window.supportMethod['" + fnName + "']=" + fnDefine)
         } else {
             let el =
                 templateLine
@@ -430,7 +435,7 @@ function transform(textArr, obj, templateArr) {
                     .replace(/=\[SEP,(\w+)\]/g, (_, fn) => window.supportInterMethod[fn] ? window.supportInterMethod[fn](obj) : '')
                     .replace(/=\[(\w+)\]/g, (_, field) => obj[field])
                     .replace(/=\[(\w+),(\w+)\]/g, (_, fn, field) => window.supportMethod[fn] ? window.supportMethod[fn](obj[field]) : '')
-                    .replace(/=\[(\w+),(\w+),(\w+)\]/g, (_, fn, field, param) => window.supportMethod[fn] ? window.supportMethod[fn](obj[field],param) : '')
+                    .replace(/=\[(\w+),(\w+),(\w+)\]/g, (_, fn, field, param) => window.supportMethod[fn] ? window.supportMethod[fn](obj[field], param) : '')
             textArr.push(el);
         }
     }
@@ -442,13 +447,13 @@ function parseHTList(text) {
     let items = []
 
     text.split("\n").forEach(line => {
-        let value = {a0:line}
+        let value = { a0: line }
         let cols = line.split("\t")
 
         let index = 0
         cols.forEach(c => {
             index += 1
-            value["a"+index] = c
+            value["a" + index] = c
         })
         items.push(value)
     })
@@ -507,8 +512,8 @@ function upperFirstAndPlural(str) {
 // 数据类型: string, int, timestamp, double
 // Scala的类型: String, Int, LocalDateTime, BigDecimal
 function dataTypeToScala(str) {
-    let types = ['string','int','timestamp','double']
-    let scalaTypes = ['String','Int','LocalDateTime','BigDecimal']
+    let types = ['string', 'int', 'timestamp', 'double']
+    let scalaTypes = ['String', 'Int', 'LocalDateTime', 'BigDecimal']
     for (let i = 0; i < types.length; i++) {
         if (types[i] == str) {
             return scalaTypes[i]
@@ -521,8 +526,8 @@ function dataTypeToScala(str) {
 // 数据类型: string, int, timestamp, double
 // Scala的类型: String, Int, LocalDateTime, BigDecimal
 function dataTypeToScalaV1(str) {
-    let types = ['string','int','timestamp','double']
-    let scalaTypes = ['String','Int','java.sql.Timestamp','BigDecimal']
+    let types = ['string', 'int', 'timestamp', 'double']
+    let scalaTypes = ['String', 'Int', 'java.sql.Timestamp', 'BigDecimal']
     for (let i = 0; i < types.length; i++) {
         if (types[i] == str) {
             return scalaTypes[i]
@@ -535,8 +540,8 @@ function dataTypeToScalaV1(str) {
 // 数据类型: string, int, timestamp, double
 // Scala的类型: String, Int, LocalDateTime, BigDecimal
 function dataTypeToThrift(str) {
-    let types = ['string','int','timestamp','double']
-    let scalaTypes = ['string','i32','i64','double']
+    let types = ['string', 'int', 'timestamp', 'double']
+    let scalaTypes = ['string', 'i32', 'i64', 'double']
     for (let i = 0; i < types.length; i++) {
         if (types[i] == str) {
             return scalaTypes[i]
