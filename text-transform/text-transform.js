@@ -44,7 +44,8 @@ $(document).ready(function () {
         snakecase,
         refreshThriftStructIndex,
         jiancheng,
-        areaCommon
+        areaCommon,
+        addLineNumbers,
     }
 })
 
@@ -88,7 +89,7 @@ function scalaSqlTo(str) {
 
 // WrappedArray(JdbcValue(6), JdbcValue(40)) => ["'6'", "'40'"]
 function reJdbcValue(str) {
-    return str.split("JdbcValue").filter(it=> /\((.*?)\)/.test(it)).map(it => "'" + /\((.*?)\)/.exec(it)[1] + "'")
+    return str.split("JdbcValue").filter(it => /\((.*?)\)/.test(it)).map(it => "'" + /\((.*?)\)/.exec(it)[1] + "'")
 }
 
 // ArrayBuffer(2121, 1) => ["'2121'", "'1'"]
@@ -243,4 +244,15 @@ function areaCommon(str) {
     }).filter(it => it.length > 0)
     console.log(arr)
     return arr.join("\n")
+}
+
+// 每行增加编号
+function addLineNumbers(text) {
+    // 将文本按行分割成数组
+    const lines = text.split('\n');
+    // 使用 map 方法为每一行添加行号
+    const numberedLines = lines.map((line, index) => `${index + 1}. ${line}`);
+    // 将处理后的每行文本拼接成最终文本
+    const numberedText = numberedLines.join('\n');
+    return numberedText;
 }
