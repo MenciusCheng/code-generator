@@ -264,6 +264,9 @@ function processProtoText(text) {
     let lineNumber = 0;
 
     const processedText = text.split("\n").map(line => {
+        if (line.trim().startsWith("message ")) {
+            lineNumber = 0;
+        }
         if (!regex.test(line)) {
             return line;
         }
@@ -273,9 +276,9 @@ function processProtoText(text) {
         let field = arr[3].replace(/\B([A-Z])/g, '_$1').toLowerCase();
 
         if (arr[1]) {
-            return ` ${arr[1].trim()} ${arr[2]} ${field} = ${lineNumber}; ${arr[5]}`;
+            return `  ${arr[1].trim()} ${arr[2]} ${field} = ${lineNumber}; ${arr[5]}`;
         } else {
-            return ` ${arr[2]} ${field} = ${lineNumber}; ${arr[5]}`;
+            return `  ${arr[2]} ${field} = ${lineNumber}; ${arr[5]}`;
         }
     }).join('\n');
 
