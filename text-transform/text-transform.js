@@ -46,6 +46,7 @@ $(document).ready(function () {
         jiancheng,
         areaCommon,
         addLineNumbers,
+        processProtoText,
     }
 })
 
@@ -255,4 +256,28 @@ function addLineNumbers(text) {
     // 将处理后的每行文本拼接成最终文本
     const numberedText = numberedLines.join('\n');
     return numberedText;
+}
+
+function processProtoText(text) {
+    // 使用正则表达式匹配字段名、类型、编号和注释
+    const regex = /(repeated\s+)?(\w+)\s+(\w+)\s+=\s+(\d+);\s*(\/\/.*)?/;
+    let lineNumber = 0;
+
+    const processedText = text.split("\n").map(line => {
+        if (!regex.test(line)) {
+            return line;
+        }
+        let arr = regex.exec(line);
+        // console.log(line, arr);
+        lineNumber++;
+        let field = arr[3].replace(/\B([A-Z])/g, '_$1').toLowerCase();
+
+        if (arr[1]) {
+            return ` ${arr[1].trim()} ${arr[2]} ${field} = ${lineNumber}; ${arr[5]}`;
+        } else {
+            return ` ${arr[2]} ${field} = ${lineNumber}; ${arr[5]}`;
+        }
+    }).join('\n');
+
+    return processedText;
 }
